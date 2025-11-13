@@ -1,1 +1,11 @@
-{"welcome.md":"file","getting_started":{"introduction.md":"file"}}
+[
+  { "name": "welcome.md", "type": "file" },
+  {
+    "name": "getting_started",
+    "type": "directory",
+    "children": [
+      { "name": "introduction.md", "type": "file" },
+      { "name": "first_step.md", "type": "file" }
+    ]
+  }
+]

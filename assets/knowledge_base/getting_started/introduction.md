@@ -2,14 +2,14 @@
 
 This is your first article!
 
-## [First Step](#first-step)
+## First Step
 
 Here is the first step to something amazing.
 
-## [Second Step](#second-step)
+## Second Step
 
 And here is the second.
 
-### [A Sub-step](#a-sub-step)
+### A Sub-step
 
 You can even have sub-steps.
