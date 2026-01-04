@@ -1,8 +1,54 @@
 import 'package:knowledge_base/core/utils/constants.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
+class TOCItem {
+  /// Title of the item
+  final String title;
+
+  /// Heading in the document (H1 - H6)
+  final TOCHeading heading;
+  const TOCItem({required this.title, required this.heading});
+}
+
+enum TOCHeading {
+  h1(1),
+  h2(2),
+  h3(3),
+  h4(4),
+  h5(5),
+  h6(6);
+
+  final int level;
+  const TOCHeading(this.level);
+  static TOCHeading fromLevel(int level) {
+    switch (level) {
+      case 1:
+        return TOCHeading.h1;
+      case 2:
+        return TOCHeading.h2;
+      case 3:
+        return TOCHeading.h3;
+      case 4:
+        return TOCHeading.h4;
+      case 5:
+        return TOCHeading.h5;
+      case 6:
+        return TOCHeading.h6;
+      default:
+        return TOCHeading.h1;
+    }
+  }
+}
+
 class TableOfContent extends StatelessWidget {
-  const TableOfContent({super.key});
+  const TableOfContent({
+    required this.items,
+    required this.activeItemIndex,
+    super.key,
+  });
+
+  final int activeItemIndex;
+  final List<TOCItem> items;
 
   @override
   Widget build(BuildContext context) {
@@ -12,32 +58,24 @@ class TableOfContent extends StatelessWidget {
         Container(
           height: navigationSize,
           alignment: Alignment.centerLeft,
-          padding: const EdgeInsets.all(SizePadding.base),
+          padding: const EdgeInsets.symmetric(
+            horizontal: SizePadding.large,
+            vertical: SizePadding.base,
+          ),
           child: const Text('On This Page').semiBold().muted(),
         ),
         const Divider(),
         Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(SizePadding.base),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _TocItem(level: 1, title: 'Authentication API', isActive: true),
-                _TocItem(level: 2, title: 'Overview'),
-                _TocItem(level: 2, title: 'Authentication Flow'),
-                _TocItem(level: 3, title: 'Initial Login', indent: 1),
-                _TocItem(level: 3, title: 'Token Refresh', indent: 1),
-                _TocItem(level: 2, title: 'Endpoints'),
-                _TocItem(level: 3, title: 'POST /api/auth/login', indent: 1),
-                _TocItem(level: 3, title: 'POST /api/auth/refresh', indent: 2),
-                _TocItem(level: 3, title: 'POST /api/auth/logout', indent: 3),
-                _TocItem(level: 3, title: 'GET /api/auth/me', indent: 4),
-                _TocItem(level: 2, title: 'Security Considerations', isActive: true,),
-                _TocItem(level: 4, title: 'Token Storage', indent: 1, isActive: true,),
-                _TocItem(level: 4, title: 'Rate Limiting', indent: 2, isActive: true,),
-                _TocItem(level: 4, title: 'Password Requirements', indent: 3, isActive: true,),
-              ],
-            ),
+          child: ListView.builder(
+            itemCount: items.length,
+            padding: EdgeInsets.all(SizePadding.base),
+            itemBuilder: (_, index) {
+              final item = items[index];
+              return _TocItem(
+                item: item,
+                isActive: index == activeItemIndex.clamp(0, items.length - 1),
+              );
+            },
           ),
         ),
       ],
@@ -46,22 +84,16 @@ class TableOfContent extends StatelessWidget {
 }
 
 class _TocItem extends StatelessWidget {
-  final int level;
-  final String title;
-  final int indent;
+  final TOCItem item;
   final bool isActive;
 
-  const _TocItem({
-    required this.level,
-    required this.title,
-    this.indent = 0,
-    this.isActive = false,
-  }) : assert(indent >= 0, 'Indent must be non-negative');
+  const _TocItem({required this.item, this.isActive = false});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final indentScale = (level / 2);
+    final indent = item.heading.level - 1;
+    final indentScale = (indent * 0.25);
     return TextButton(
       onPressed: () {},
       density: ButtonDensity.compact,
@@ -83,21 +115,21 @@ class _TocItem extends StatelessWidget {
           Expanded(
             child:
                 Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 14 - indentScale,
-                    fontWeight: FontWeight.normal,
-                    color: isActive
-                        ? theme.colorScheme.primary
-                        : theme.colorScheme.foreground,
-                  ),
-                ).withPadding(
-                  padding: EdgeInsets.only(
-                    left: indent * SizePadding.base,
-                    top: SizePadding.small,
-                    bottom: SizePadding.small,
-                  ),
-                ),
+                      item.title,
+                      style: TextStyle(
+                        fontSize: 14 - indentScale,
+                        fontWeight: FontWeight.normal,
+                        color: theme.colorScheme.foreground,
+                      ),
+                    )
+                    .withPadding(
+                      padding: EdgeInsets.only(
+                        left: indent * SizePadding.base - indentScale,
+                        top: SizePadding.small,
+                        bottom: SizePadding.small,
+                      ),
+                    )
+                    .withOpacity(isActive ? 1.0 : 0.8),
           ),
         ],
       ),

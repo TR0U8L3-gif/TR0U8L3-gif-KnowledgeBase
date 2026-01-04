@@ -54,7 +54,34 @@ class _KnowledgeBasePageState extends State<KnowledgeBasePage> {
           ],
           const Expanded(flex: 3, child: CenterPanelWidget()),
           const VerticalDivider(),
-          const SizedBox(width: 250, child: TableOfContent()),
+          const SizedBox(
+            width: 250,
+            child: TableOfContent(
+              activeItemIndex: 0,
+              items: [
+                TOCItem(title: 'Authentication API', heading: TOCHeading.h1),
+                TOCItem(title: 'Overview', heading: TOCHeading.h2),
+                TOCItem(title: 'Authentication Flow', heading: TOCHeading.h2),
+                TOCItem(title: 'Initial Login', heading: TOCHeading.h3),
+                TOCItem(title: 'Token Refresh', heading: TOCHeading.h1),
+                TOCItem(title: 'Endpoints', heading: TOCHeading.h2),
+                TOCItem(title: 'POST /api/auth/login', heading: TOCHeading.h3),
+                TOCItem(
+                  title: 'POST /api/auth/refresh',
+                  heading: TOCHeading.h3,
+                ),
+                TOCItem(title: 'POST /api/auth/logout', heading: TOCHeading.h1),
+                TOCItem(title: 'GET /api/auth/me', heading: TOCHeading.h2),
+                TOCItem(
+                  title: 'Security Considerations',
+                  heading: TOCHeading.h3,
+                ),
+                TOCItem(title: 'Token Storage', heading: TOCHeading.h4),
+                TOCItem(title: 'Rate Limiting', heading: TOCHeading.h5),
+                TOCItem(title: 'Password Requirements', heading: TOCHeading.h6),
+              ],
+            ),
+          ),
         ],
       ),
     );
