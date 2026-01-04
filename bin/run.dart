@@ -1,8 +1,7 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:args/args.dart';
 import 'package:cli_util/cli_logging.dart';
-import 'utils/directory_scanner.dart';
+import 'commands/index_command.dart';
 
 void main(List<String> arguments) async {
   final parser = ArgParser()
@@ -39,20 +38,14 @@ void main(List<String> arguments) async {
     final outputPath = results['output'] as String;
     final maxDepth = int.tryParse(results['max-depth'] as String);
 
-    final sourceDir = Directory(sourcePath);
-    if (!await sourceDir.exists()) {
-      logger.stderr('Error: Source directory does not exist: $sourcePath');
-      exit(1);
-    }
-
     logger.stdout('Scanning directory: $sourcePath');
     final progress = logger.progress('Generating structure');
 
-    final structure = await _generateStructure(sourceDir, maxDepth);
-
-    final jsonOutput = JsonEncoder.withIndent('  ').convert(structure);
-    final outputFile = File(outputPath);
-    await outputFile.writeAsString(jsonOutput);
+    await indexCommand(
+      sourcePath: sourcePath,
+      outputPath: outputPath,
+      maxDepth: maxDepth,
+    );
 
     progress.finish(showTiming: true);
     logger.stdout('Structure saved to: $outputPath');
@@ -66,25 +59,9 @@ void main(List<String> arguments) async {
 
 void _printUsage(ArgParser parser) {
   Logger.standard()
-    ..stdout('Usage: dart run bin/generate_structure.dart --source <path>')
+    ..stdout('Usage: dart run bin/run.dart --source <path>')
     ..stdout('')
     ..stdout('Generate a JSON file with the folder structure of all files.')
     ..stdout('')
     ..stdout(parser.usage);
-}
-
-Future<Map<String, dynamic>> _generateStructure(
-  Directory root,
-  int? maxDepth,
-) async {
-  final rootCatalog = await scanDirectory(
-    root,
-    root.path,
-    0,
-    maxDepth ?? maxDepthDefault,
-  );
-  return {
-    'generated': DateTime.now().toIso8601String(),
-    'directory': rootCatalog,
-  };
 }
