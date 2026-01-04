@@ -1,16 +1,16 @@
-/// Handles file information extraction and metadata.
 
 import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'file_info.dart';
 
-Future<Map<String, dynamic>> scanFile(
+/// Handles file information extraction and metadata.
+Future<Map<String, dynamic>?> scanFile(
   File file, {
   required String relativeTo,
 }) async {
   final stat = await file.stat();
   final extension = path.extension(file.path).toLowerCase();
-  final frontmatter = await readFrontmatter(file);
+  final frontmatter = await readFileFrontmatter(file);
 
   final fallbackName = path.basename(file.path);
   final name = frontmatter.name?.trim().isNotEmpty == true
@@ -21,6 +21,10 @@ Future<Map<String, dynamic>> scanFile(
 
   final lastModified = frontmatter.lastModified ?? stat.modified;
   final created = frontmatter.created ?? stat.changed;
+
+  if(frontmatter.display == false) {
+    return null;
+  }
 
   return {
     'type': 'file',

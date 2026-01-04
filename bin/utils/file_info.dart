@@ -2,10 +2,11 @@ import 'dart:io';
 import 'package:yaml/yaml.dart';
 
 /// Parsed frontmatter values.
-class Frontmatter {
-  const Frontmatter({
+class FileFrontmatter {
+  const FileFrontmatter({
     this.name,
     this.description,
+    this.display,
     this.tags,
     this.image,
     this.created,
@@ -14,29 +15,62 @@ class Frontmatter {
 
   final String? name;
   final String? description;
+  final bool? display;
   final List<String>? tags;
   final String? image;
   final DateTime? created;
   final DateTime? lastModified;
 }
 
+/// Parsed frontmatter values.
+class DirectoryFrontmatter {
+  const DirectoryFrontmatter({
+    this.name,
+    this.description,
+    this.icon,
+    this.order,
+  });
+
+  final String? name;
+  final String? description;
+  final String? icon;
+  final List<String>? order;
+}
+
 /// Attempts to read YAML frontmatter from the file content.
-Future<Frontmatter> readFrontmatter(File file) async {
+Future<FileFrontmatter> readFileFrontmatter(File file) async {
   try {
     final content = await file.readAsString();
     final raw = _extractFrontmatter(content);
-    if (raw == null) return const Frontmatter();
+    if (raw == null) return const FileFrontmatter();
 
-    return Frontmatter(
+    return FileFrontmatter(
       name: _asString(raw['name']),
       description: _asString(raw['description']),
+      display: _asBool(raw['display']),
       tags: _asStringList(raw['tags']),
       image: _asString(raw['image']),
       created: _parseDate(raw['created']),
       lastModified: _parseDate(raw['last_modified'] ?? raw['updated']),
     );
   } catch (_) {
-    return const Frontmatter();
+    return const FileFrontmatter();
+  }
+}
+
+Future<DirectoryFrontmatter> readDirectoryFrontmatter(File file) async {
+  try {
+    final content = await file.readAsString();
+    final raw = _extractFrontmatter(content);
+    if (raw == null) return const DirectoryFrontmatter();
+    return DirectoryFrontmatter(
+      name: _asString(raw['name']),
+      description: _asString(raw['description']),
+      icon: _asString(raw['icon']),
+      order: _asStringList(raw['order']),
+    );
+  } catch (_) {
+    return const DirectoryFrontmatter();
   }
 }
 
@@ -95,6 +129,15 @@ List<String>? _asStringList(dynamic value) {
   }
   final text = value.toString().trim();
   return text.isEmpty ? null : [text];
+}
+
+bool? _asBool(dynamic value) {
+  if (value == null) return null;
+  if (value is bool) return value;
+  final text = value.toString().trim().toLowerCase();
+  if (text == 'true') return true;
+  if (text == 'false') return false;
+  return null;
 }
 
 DateTime? _parseDate(dynamic value) {

@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'file_scanner.dart';
-import 'file_analyzer.dart';
+import 'file_info.dart';
 
 const maxDepthDefault = 16;
 
@@ -18,12 +18,11 @@ Future<Map<String, dynamic>> scanDirectory(
   final fallbackName = path.basename(dir.path);
   final relativePath = path.relative(dir.path, from: rootPath);
 
-  Map<String, dynamic> _directoryResult() => {
+  Map<String, dynamic> directoryResult() => {
     'type': 'directory',
     'name': frontmatter.name ?? fallbackName,
     'path': relativePath,
     'description': frontmatter.description,
-    'display': frontmatter.display,
     'icon': frontmatter.icon,
     'items': items,
     'order': frontmatter.order,
@@ -31,7 +30,7 @@ Future<Map<String, dynamic>> scanDirectory(
 
   if (depth > maxDepth) {
     stderr.writeln('Warning: Maximum directory depth exceeded at ${dir.path}');
-    return _directoryResult();
+    return directoryResult();
   }
 
   try {
@@ -43,17 +42,6 @@ Future<Map<String, dynamic>> scanDirectory(
       ..setAll(0, _applyOrder(entities, frontmatter.order));
 
     for (final entity in entities) {
-      final name = path.basename(entity.path);
-
-      // Skip hidden files and common build directories
-      if (name.startsWith('.') ||
-          name == 'build' ||
-          name == '.dart_tool' ||
-          name == '_directory.md' ||
-          name == 'node_modules') {
-        continue;
-      }
-
       if (entity is Directory) {
         final subCatalog = await scanDirectory(
           entity,
@@ -64,14 +52,16 @@ Future<Map<String, dynamic>> scanDirectory(
         items.add(subCatalog);
       } else if (entity is File) {
         final fileInfo = await scanFile(entity, relativeTo: rootPath);
-        items.add(fileInfo);
+        if (fileInfo != null) {
+          items.add(fileInfo);
+        }
       }
     }
   } catch (e) {
     stderr.writeln('Warning: Could not scan ${dir.path}: $e');
   }
 
-  return _directoryResult();
+  return directoryResult();
 }
 
 List<FileSystemEntity> _applyOrder(
