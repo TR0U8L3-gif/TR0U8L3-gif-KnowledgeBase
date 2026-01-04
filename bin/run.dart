@@ -3,12 +3,16 @@ import 'package:args/args.dart';
 import 'package:cli_util/cli_logging.dart';
 import 'commands/structure_command.dart';
 import 'commands/move_command.dart';
+import 'commands/declare_command.dart';
+
+const String defaultAssetsDir = 'doc_assets';
 
 void main(List<String> arguments) async {
   final parser = ArgParser()
     ..addFlag('help', abbr: 'h', help: 'Show help', negatable: false)
     ..addCommand('structure', _buildStructureParser())
-    ..addCommand('move', _buildMoveParser());
+    ..addCommand('move', _buildMoveParser())
+    ..addCommand('declare', _buildDeclareParser());
 
   try {
     final results = parser.parse(arguments);
@@ -24,6 +28,9 @@ void main(List<String> arguments) async {
     switch (command) {
       case 'move':
         await _runMove(commandArgs);
+        break;
+      case 'declare':
+        await _runDeclare(commandArgs);
         break;
       case 'structure':
       default:
@@ -74,7 +81,23 @@ ArgParser _buildMoveParser() {
       'assets',
       abbr: 'a',
       help: 'Assets output directory',
-      defaultsTo: 'assets',
+      defaultsTo: defaultAssetsDir,
+    );
+}
+
+ArgParser _buildDeclareParser() {
+  return ArgParser()
+    ..addOption(
+      'assets',
+      abbr: 'a',
+      help: 'Assets directory to scan',
+      defaultsTo: defaultAssetsDir,
+    )
+    ..addOption(
+      'pubspec',
+      abbr: 'p',
+      help: 'Path to pubspec.yaml',
+      defaultsTo: 'pubspec.yaml',
     );
 }
 
@@ -110,11 +133,11 @@ Future<void> _runMove(ArgResults args) async {
   final logger = Logger.standard();
 
   final structurePath = args['structure'] as String?;
-  final sourceRoot = args['source-root'] as String?;
-  final assetsRoot = args['assets'] as String? ?? 'assets';
+  final sourceRoot = args['source'] as String?;
+  final assetsRoot = args['assets'] as String?;
 
-  if (structurePath == null || sourceRoot == null) {
-    throw ArgumentError('Missing required --structure or --source-root');
+  if (structurePath == null || sourceRoot == null || assetsRoot == null) {
+    throw ArgumentError('Missing required --structure, --source, or --assets');
   }
 
   logger.stdout('Copying assets from $sourceRoot using $structurePath');
@@ -132,12 +155,37 @@ Future<void> _runMove(ArgResults args) async {
   logger.stdout('Assets copied to: $assetsRoot');
 }
 
+Future<void> _runDeclare(ArgResults args) async {
+  final logger = Logger.standard();
+
+  final assetsRoot = args['assets'] as String?;
+  final pubspecPath = args['pubspec'] as String?;
+
+  if (assetsRoot == null || pubspecPath == null) {
+    throw ArgumentError('Missing required --assets or --pubspec');
+  }
+
+  logger.stdout('Declaring assets from $assetsRoot in $pubspecPath');
+  final progress = logger.progress('Updating pubspec.yaml');
+
+  await declareCommand(
+    DeclareCommandInput(
+      assetsRoot: assetsRoot,
+      pubspecPath: pubspecPath,
+    ),
+  );
+
+  progress.finish(showTiming: true);
+  logger.stdout('Assets declared in: $pubspecPath');
+}
+
 void _printUsage(ArgParser parser) {
   Logger.standard()
     ..stdout('Usage: dart run bin/run.dart <command> [options]')
     ..stdout('Commands:')
     ..stdout('  structure  Generate structure JSON (default if no command)')
     ..stdout('  move       Copy files to assets from a structure JSON')
+    ..stdout('  declare    Add assets to pubspec.yaml')
     ..stdout('')
     ..stdout('Global options:')
     ..stdout(parser.usage)
@@ -146,5 +194,8 @@ void _printUsage(ArgParser parser) {
     ..stdout(_buildStructureParser().usage)
     ..stdout('')
     ..stdout('Move options:')
-    ..stdout(_buildMoveParser().usage);
+    ..stdout(_buildMoveParser().usage)
+    ..stdout('')
+    ..stdout('Declare options:')
+    ..stdout(_buildDeclareParser().usage);
 }
