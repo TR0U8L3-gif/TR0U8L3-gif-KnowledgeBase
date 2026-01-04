@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:args/args.dart';
 import 'package:cli_util/cli_logging.dart';
-import 'commands/index_command.dart';
+import 'commands/structure_command.dart';
 
 void main(List<String> arguments) async {
   final parser = ArgParser()
@@ -15,7 +15,7 @@ void main(List<String> arguments) async {
       'output',
       abbr: 'o',
       help: 'Output JSON file path',
-      defaultsTo: 'structure.json',
+      defaultsTo: null,
     )
     ..addOption(
       'max-depth',
@@ -35,16 +35,18 @@ void main(List<String> arguments) async {
 
     final logger = Logger.standard();
     final sourcePath = results['source'] as String;
-    final outputPath = results['output'] as String;
+    final outputPath = results['output'] as String?;
     final maxDepth = int.tryParse(results['max-depth'] as String);
 
     logger.stdout('Scanning directory: $sourcePath');
     final progress = logger.progress('Generating structure');
 
-    await indexCommand(
-      sourcePath: sourcePath,
-      outputPath: outputPath,
-      maxDepth: maxDepth,
+    await structureCommand(
+      StructureCommandInput(
+        sourcePath: sourcePath,
+        outputPath: outputPath,
+        maxDepth: maxDepth,
+      ),
     );
 
     progress.finish(showTiming: true);

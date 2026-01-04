@@ -1,7 +1,7 @@
 
 import 'dart:io';
 import 'package:path/path.dart' as path;
-import 'file_info.dart';
+import 'frontmatter.dart';
 
 /// Handles file information extraction and metadata.
 Future<Map<String, dynamic>?> scanFile(

@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'file_scanner.dart';
-import 'file_info.dart';
+import 'frontmatter.dart';
 
 const maxDepthDefault = 16;
 
