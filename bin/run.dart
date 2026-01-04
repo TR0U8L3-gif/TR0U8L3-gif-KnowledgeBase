@@ -2,55 +2,34 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:cli_util/cli_logging.dart';
 import 'commands/structure_command.dart';
+import 'commands/move_command.dart';
 
 void main(List<String> arguments) async {
   final parser = ArgParser()
-    ..addOption(
-      'source',
-      abbr: 's',
-      help: 'Source directory to scan',
-      mandatory: true,
-    )
-    ..addOption(
-      'output',
-      abbr: 'o',
-      help: 'Output JSON file path',
-      defaultsTo: null,
-    )
-    ..addOption(
-      'max-depth',
-      abbr: 'd',
-      help: 'Maximum directory depth to scan',
-      defaultsTo: '16',
-    )
-    ..addFlag('help', abbr: 'h', help: 'Show help', negatable: false);
+    ..addFlag('help', abbr: 'h', help: 'Show help', negatable: false)
+    ..addCommand('structure', _buildStructureParser())
+    ..addCommand('move', _buildMoveParser());
 
   try {
     final results = parser.parse(arguments);
 
-    if (results['help'] as bool) {
+    if (results['help'] == true) {
       _printUsage(parser);
       exit(0);
     }
 
-    final logger = Logger.standard();
-    final sourcePath = results['source'] as String;
-    final outputPath = results['output'] as String?;
-    final maxDepth = int.tryParse(results['max-depth'] as String);
+    final command = results.command?.name ?? 'structure';
+    final commandArgs = results.command ?? results;
 
-    logger.stdout('Scanning directory: $sourcePath');
-    final progress = logger.progress('Generating structure');
-
-    await structureCommand(
-      StructureCommandInput(
-        sourcePath: sourcePath,
-        outputPath: outputPath,
-        maxDepth: maxDepth,
-      ),
-    );
-
-    progress.finish(showTiming: true);
-    logger.stdout('Structure saved to: $outputPath');
+    switch (command) {
+      case 'move':
+        await _runMove(commandArgs);
+        break;
+      case 'structure':
+      default:
+        await _runStructure(commandArgs);
+        break;
+    }
   } catch (e) {
     stderr.writeln('Error: $e');
     stderr.writeln('');
@@ -59,11 +38,113 @@ void main(List<String> arguments) async {
   }
 }
 
+ArgParser _buildStructureParser() {
+  return ArgParser()
+    ..addOption(
+      'source',
+      abbr: 's',
+      help: 'Source directory to scan',
+      mandatory: true,
+    )
+    ..addOption('output', abbr: 'o', help: 'Output JSON file path')
+    ..addOption(
+      'max-depth',
+      abbr: 'd',
+      help: 'Maximum directory depth to scan',
+      defaultsTo: '16',
+    );
+}
+
+ArgParser _buildMoveParser() {
+  return ArgParser()
+    ..addOption(
+      'structure',
+      abbr: 'i',
+      help: 'Input structure JSON file',
+      mandatory: true,
+    )
+    ..addOption(
+      'source',
+      abbr: 's',
+      help:
+          'Root directory that contains the files referenced by the structure',
+      mandatory: true,
+    )
+    ..addOption(
+      'assets',
+      abbr: 'a',
+      help: 'Assets output directory',
+      defaultsTo: 'assets',
+    );
+}
+
+Future<void> _runStructure(ArgResults args) async {
+  final logger = Logger.standard();
+
+  final sourcePath = args['source'] as String?;
+  if (sourcePath == null || sourcePath.isEmpty) {
+    throw ArgumentError('Missing required --source');
+  }
+
+  final outputPath = args['output'] as String?;
+  final maxDepth = (args['max-depth'] as String?) != null
+      ? int.tryParse(args['max-depth'] as String)
+      : null;
+
+  logger.stdout('Scanning directory: $sourcePath');
+  final progress = logger.progress('Generating structure');
+
+  await structureCommand(
+    StructureCommandInput(
+      sourcePath: sourcePath,
+      outputPath: outputPath,
+      maxDepth: maxDepth,
+    ),
+  );
+
+  progress.finish(showTiming: true);
+  logger.stdout('Structure saved to: ${outputPath ?? '<stdout only>'}');
+}
+
+Future<void> _runMove(ArgResults args) async {
+  final logger = Logger.standard();
+
+  final structurePath = args['structure'] as String?;
+  final sourceRoot = args['source-root'] as String?;
+  final assetsRoot = args['assets'] as String? ?? 'assets';
+
+  if (structurePath == null || sourceRoot == null) {
+    throw ArgumentError('Missing required --structure or --source-root');
+  }
+
+  logger.stdout('Copying assets from $sourceRoot using $structurePath');
+  final progress = logger.progress('Copying to $assetsRoot');
+
+  await moveCommand(
+    MoveCommandInput(
+      structurePath: structurePath,
+      sourceRoot: sourceRoot,
+      assetsRoot: assetsRoot,
+    ),
+  );
+
+  progress.finish(showTiming: true);
+  logger.stdout('Assets copied to: $assetsRoot');
+}
+
 void _printUsage(ArgParser parser) {
   Logger.standard()
-    ..stdout('Usage: dart run bin/run.dart --source <path>')
+    ..stdout('Usage: dart run bin/run.dart <command> [options]')
+    ..stdout('Commands:')
+    ..stdout('  structure  Generate structure JSON (default if no command)')
+    ..stdout('  move       Copy files to assets from a structure JSON')
     ..stdout('')
-    ..stdout('Generate a JSON file with the folder structure of all files.')
+    ..stdout('Global options:')
+    ..stdout(parser.usage)
     ..stdout('')
-    ..stdout(parser.usage);
+    ..stdout('Structure options:')
+    ..stdout(_buildStructureParser().usage)
+    ..stdout('')
+    ..stdout('Move options:')
+    ..stdout(_buildMoveParser().usage);
 }
