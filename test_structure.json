@@ -1,255 +1,263 @@
 {
-  "root": "docs",
-  "generated": "2026-01-04T00:30:15.580277",
-  "catalog": {
-    "type": "catalog",
+  "generated": "2026-01-04T01:33:56.296506",
+  "directory": {
+    "type": "directory",
     "name": "docs",
     "path": ".",
+    "description": null,
+    "display": null,
+    "icon": null,
     "items": [
       {
-        "type": "catalog",
-        "name": "api",
+        "type": "directory",
+        "name": "API Documentation",
         "path": "api",
+        "description": "API documentation files",
+        "display": false,
+        "icon": null,
         "items": [
           {
             "type": "file",
-            "name": "_order.md",
-            "path": "api/_order.md",
-            "description": "Markdown documentation",
-            "tags": [
-              "documentation",
-              "markdown"
-            ],
-            "image": null,
-            "last_modified": "2026-01-04T00:12:55.485",
-            "created": "2026-01-04T00:12:55.485",
-            "size": 198,
-            "extension": "md"
-          },
-          {
-            "type": "file",
-            "name": "auth.md",
-            "path": "api/auth.md",
-            "description": "Markdown documentation",
-            "tags": [
-              "documentation",
-              "markdown"
-            ],
-            "image": null,
-            "last_modified": "2026-01-04T00:12:55.485",
-            "created": "2026-01-04T00:12:55.485",
-            "size": 1093,
-            "extension": "md"
-          },
-          {
-            "type": "file",
-            "name": "payments.md",
+            "name": "Payments API",
             "path": "api/payments.md",
-            "description": "Markdown documentation",
+            "description": "Payment processing endpoints including intent creation, confirmation and webhooks",
             "tags": [
-              "documentation",
-              "markdown"
+              "api",
+              "payments",
+              "billing",
+              "webhooks"
             ],
             "image": null,
-            "last_modified": "2026-01-04T00:12:55.485",
-            "created": "2026-01-04T00:12:55.485",
-            "size": 1373,
+            "last_modified": "2026-01-04T00:00:00.000Z",
+            "created": "2026-01-03T00:00:00.000Z",
+            "extension": "md"
+          },
+          {
+            "type": "file",
+            "name": "Authentication API",
+            "path": "api/auth.md",
+            "description": "Authentication endpoints including login, refresh, logout and user information",
+            "tags": [
+              "api",
+              "authentication",
+              "security",
+              "jwt"
+            ],
+            "image": null,
+            "last_modified": "2026-01-04T00:00:00.000Z",
+            "created": "2026-01-03T00:00:00.000Z",
             "extension": "md"
           }
+        ],
+        "order": [
+          "payments.md",
+          "auth.md"
         ]
       },
       {
-        "type": "catalog",
-        "name": "architecture",
+        "type": "directory",
+        "name": "Architecture Documentation",
         "path": "architecture",
+        "description": "Architecture documentation files",
+        "display": false,
+        "icon": null,
         "items": [
           {
             "type": "file",
-            "name": "_order.md",
-            "path": "architecture/_order.md",
-            "description": "Markdown documentation",
-            "tags": [
-              "documentation",
-              "markdown"
-            ],
-            "image": null,
-            "last_modified": "2026-01-04T00:12:55.485",
-            "created": "2026-01-04T00:12:55.485",
-            "size": 221,
-            "extension": "md"
-          },
-          {
-            "type": "file",
-            "name": "data-flow.md",
-            "path": "architecture/data-flow.md",
-            "description": "Markdown documentation",
-            "tags": [
-              "documentation",
-              "markdown"
-            ],
-            "image": null,
-            "last_modified": "2026-01-04T00:12:55.485",
-            "created": "2026-01-04T00:12:55.485",
-            "size": 1421,
-            "extension": "md"
-          },
-          {
-            "type": "file",
-            "name": "overview.md",
+            "name": "Platform Architecture Overview",
             "path": "architecture/overview.md",
-            "description": "Markdown documentation",
+            "description": "High-level platform architecture including runtime topology, availability targets and key design decisions",
             "tags": [
-              "documentation",
-              "markdown"
+              "architecture",
+              "platform",
+              "overview",
+              "slo",
+              "design"
             ],
             "image": null,
-            "last_modified": "2026-01-04T00:12:55.485",
-            "created": "2026-01-04T00:12:55.485",
-            "size": 1706,
+            "last_modified": "2026-01-04T00:00:00.000Z",
+            "created": "2026-01-03T00:00:00.000Z",
             "extension": "md"
+          },
+          {
+            "type": "file",
+            "name": "Data Flow Architecture",
+            "path": "architecture/data-flow.md",
+            "description": "Event-driven data flow from API through Kafka to warehouse with ingestion rules and quality checks",
+            "tags": [
+              "architecture",
+              "data",
+              "kafka",
+              "warehouse",
+              "events"
+            ],
+            "image": null,
+            "last_modified": "2026-01-04T00:00:00.000Z",
+            "created": "2026-01-03T00:00:00.000Z",
+            "extension": "md"
+          },
+          {
+            "type": "directory",
+            "name": "infra",
+            "path": "architecture/infra",
+            "description": null,
+            "display": null,
+            "icon": null,
+            "items": [
+              {
+                "type": "directory",
+                "name": "runbooks",
+                "path": "architecture/infra/runbooks",
+                "description": null,
+                "display": null,
+                "icon": null,
+                "items": [
+                  {
+                    "type": "file",
+                    "name": "On-Call Runbook",
+                    "path": "architecture/infra/runbooks/oncall.md",
+                    "description": "On-call procedures including pager policy, triage flow and incident response checklist",
+                    "tags": [
+                      "runbook",
+                      "oncall",
+                      "incident",
+                      "operations"
+                    ],
+                    "image": null,
+                    "last_modified": "2026-01-04T00:00:00.000Z",
+                    "created": "2026-01-03T00:00:00.000Z",
+                    "extension": "md"
+                  }
+                ],
+                "order": null
+              },
+              {
+                "type": "file",
+                "name": "Terraform Infrastructure Notes",
+                "path": "architecture/infra/terraform-notes.md",
+                "description": "Terraform patterns, state management and deployment checklist for infrastructure as code",
+                "tags": [
+                  "infrastructure",
+                  "terraform",
+                  "iac",
+                  "deployment"
+                ],
+                "image": null,
+                "last_modified": "2026-01-04T00:00:00.000Z",
+                "created": "2026-01-03T00:00:00.000Z",
+                "extension": "md"
+              }
+            ],
+            "order": null
+          },
+          {
+            "type": "directory",
+            "name": "security",
+            "path": "architecture/security",
+            "description": null,
+            "display": null,
+            "icon": null,
+            "items": [
+              {
+                "type": "file",
+                "name": "Security Threat Model",
+                "path": "architecture/security/threat-model.md",
+                "description": "STRIDE-based threat model covering data classification, security controls and open security issues",
+                "tags": [
+                  "security",
+                  "threat-model",
+                  "stride",
+                  "compliance"
+                ],
+                "image": null,
+                "last_modified": "2026-01-04T00:00:00.000Z",
+                "created": "2026-01-03T00:00:00.000Z",
+                "extension": "md"
+              }
+            ],
+            "order": null
           }
+        ],
+        "order": [
+          "overview.md",
+          "data-flow.md"
         ]
       },
       {
-        "type": "catalog",
+        "type": "directory",
         "name": "guides",
         "path": "guides",
+        "description": null,
+        "display": null,
+        "icon": null,
         "items": [
           {
             "type": "file",
-            "name": "local-dev.md",
+            "name": "Local Development Guide",
             "path": "guides/local-dev.md",
-            "description": "Markdown documentation",
+            "description": "Complete guide for setting up and running the platform locally with prerequisites and troubleshooting",
             "tags": [
-              "documentation",
-              "markdown"
+              "guide",
+              "development",
+              "setup",
+              "docker",
+              "flutter"
             ],
             "image": null,
-            "last_modified": "2026-01-04T00:12:55.497",
-            "created": "2026-01-04T00:12:55.497",
-            "size": 1268,
+            "last_modified": "2026-01-04T00:00:00.000Z",
+            "created": "2026-01-03T00:00:00.000Z",
             "extension": "md"
           }
-        ]
+        ],
+        "order": null
       },
       {
-        "type": "catalog",
-        "name": "infra",
-        "path": "infra",
-        "items": [
-          {
-            "type": "file",
-            "name": "terraform-notes.md",
-            "path": "infra/terraform-notes.md",
-            "description": "Markdown documentation",
-            "tags": [
-              "documentation",
-              "markdown"
-            ],
-            "image": null,
-            "last_modified": "2026-01-04T00:12:55.497",
-            "created": "2026-01-04T00:12:55.497",
-            "size": 1322,
-            "extension": "md"
-          }
-        ]
-      },
-      {
-        "type": "catalog",
-        "name": "ops",
+        "type": "directory",
+        "name": "Operations Documentation",
         "path": "ops",
+        "description": "Operations documentation files",
+        "display": false,
+        "icon": null,
         "items": [
           {
             "type": "file",
-            "name": "_order.md",
-            "path": "ops/_order.md",
-            "description": "Markdown documentation",
-            "tags": [
-              "documentation",
-              "markdown"
-            ],
-            "image": null,
-            "last_modified": "2026-01-04T00:12:55.505",
-            "created": "2026-01-04T00:12:55.505",
-            "size": 234,
-            "extension": "md"
-          },
-          {
-            "type": "file",
-            "name": "incident-template.md",
-            "path": "ops/incident-template.md",
-            "description": "Markdown documentation",
-            "tags": [
-              "documentation",
-              "markdown"
-            ],
-            "image": null,
-            "last_modified": "2026-01-04T00:12:55.501",
-            "created": "2026-01-04T00:12:55.501",
-            "size": 760,
-            "extension": "md"
-          },
-          {
-            "type": "file",
-            "name": "release-checklist.md",
+            "name": "Release Checklist",
             "path": "ops/release-checklist.md",
-            "description": "Markdown documentation",
+            "description": "Step-by-step checklist for safe production releases including pre-flight, deploy and rollback procedures",
             "tags": [
-              "documentation",
-              "markdown"
+              "operations",
+              "release",
+              "deployment",
+              "checklist"
             ],
             "image": null,
-            "last_modified": "2026-01-04T00:12:55.509",
-            "created": "2026-01-04T00:12:55.509",
-            "size": 935,
+            "last_modified": "2026-01-04T00:00:00.000Z",
+            "created": "2026-01-03T00:00:00.000Z",
             "extension": "md"
-          }
-        ]
-      },
-      {
-        "type": "catalog",
-        "name": "runbooks",
-        "path": "runbooks",
-        "items": [
+          },
           {
             "type": "file",
-            "name": "oncall.md",
-            "path": "runbooks/oncall.md",
-            "description": "Markdown documentation",
+            "name": "Incident Report Template",
+            "path": "ops/incident-template.md",
+            "description": "Template for documenting incidents including timeline, root cause and follow-up actions",
             "tags": [
-              "documentation",
-              "markdown"
+              "operations",
+              "incident",
+              "template",
+              "postmortem"
             ],
             "image": null,
-            "last_modified": "2026-01-04T00:12:55.509",
-            "created": "2026-01-04T00:12:55.509",
-            "size": 1294,
+            "last_modified": "2026-01-04T00:00:00.000Z",
+            "created": "2026-01-03T00:00:00.000Z",
             "extension": "md"
           }
-        ]
-      },
-      {
-        "type": "catalog",
-        "name": "security",
-        "path": "security",
-        "items": [
-          {
-            "type": "file",
-            "name": "threat-model.md",
-            "path": "security/threat-model.md",
-            "description": "Markdown documentation",
-            "tags": [
-              "documentation",
-              "markdown"
-            ],
-            "image": null,
-            "last_modified": "2026-01-04T00:12:55.509",
-            "created": "2026-01-04T00:12:55.509",
-            "size": 1321,
-            "extension": "md"
-          }
+        ],
+        "order": [
+          "release-checklist.md",
+          "incident-template.md"
         ]
       }
-    ]
+    ],
+    "order": null
   }
 }

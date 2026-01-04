@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'file_scanner.dart';
+import 'file_analyzer.dart';
 
 const maxDepthDefault = 16;
 
@@ -12,28 +13,34 @@ Future<Map<String, dynamic>> scanDirectory(
   int maxDepth = maxDepthDefault,
 ]) async {
   final items = <Map<String, dynamic>>[];
+  final frontmatter = await _readDirectoryFrontmatter(dir);
+
+  final fallbackName = path.basename(dir.path);
+  final relativePath = path.relative(dir.path, from: rootPath);
+
+  Map<String, dynamic> _directoryResult() => {
+    'type': 'directory',
+    'name': frontmatter.name ?? fallbackName,
+    'path': relativePath,
+    'description': frontmatter.description,
+    'display': frontmatter.display,
+    'icon': frontmatter.icon,
+    'items': items,
+    'order': frontmatter.order,
+  };
 
   if (depth > maxDepth) {
     stderr.writeln('Warning: Maximum directory depth exceeded at ${dir.path}');
-    return {
-      'type': 'catalog',
-      'name': path.basename(dir.path),
-      'path': path.relative(dir.path, from: rootPath),
-      'items': items,
-    };
+    return _directoryResult();
   }
 
   try {
     final entities = await dir.list().toList();
 
-    // Sort entities: directories first, then files
-    entities.sort((a, b) {
-      final aIsDir = a is Directory;
-      final bIsDir = b is Directory;
-      if (aIsDir && !bIsDir) return -1;
-      if (!aIsDir && bIsDir) return 1;
-      return path.basename(a.path).compareTo(path.basename(b.path));
-    });
+    // Sort entities with optional explicit order, then remaining directories/files alphabetically
+    entities
+      ..sort((a, b) => path.basename(a.path).compareTo(path.basename(b.path)))
+      ..setAll(0, _applyOrder(entities, frontmatter.order));
 
     for (final entity in entities) {
       final name = path.basename(entity.path);
@@ -42,6 +49,7 @@ Future<Map<String, dynamic>> scanDirectory(
       if (name.startsWith('.') ||
           name == 'build' ||
           name == '.dart_tool' ||
+          name == '_directory.md' ||
           name == 'node_modules') {
         continue;
       }
@@ -63,10 +71,58 @@ Future<Map<String, dynamic>> scanDirectory(
     stderr.writeln('Warning: Could not scan ${dir.path}: $e');
   }
 
-  return {
-    'type': 'catalog',
-    'name': path.basename(dir.path),
-    'path': path.relative(dir.path, from: rootPath),
-    'items': items,
+  return _directoryResult();
+}
+
+List<FileSystemEntity> _applyOrder(
+  List<FileSystemEntity> entities,
+  List<String>? order,
+) {
+  if (order == null || order.isEmpty) {
+    return _fallbackSort(entities);
+  }
+
+  final remaining = <String, FileSystemEntity>{
+    for (final entity in entities) path.basename(entity.path): entity,
   };
+
+  final ordered = <FileSystemEntity>[];
+
+  for (final name in order) {
+    final entity = remaining.remove(name);
+    if (entity != null) {
+      ordered.add(entity);
+    }
+  }
+
+  ordered.addAll(_fallbackSort(remaining.values.toList()));
+  return ordered;
+}
+
+List<FileSystemEntity> _fallbackSort(List<FileSystemEntity> entities) {
+  final directories = <FileSystemEntity>[];
+  final files = <FileSystemEntity>[];
+
+  for (final entity in entities) {
+    if (entity is Directory) {
+      directories.add(entity);
+    } else {
+      files.add(entity);
+    }
+  }
+
+  directories.sort(
+    (a, b) => path.basename(a.path).compareTo(path.basename(b.path)),
+  );
+  files.sort((a, b) => path.basename(a.path).compareTo(path.basename(b.path)));
+
+  return [...directories, ...files];
+}
+
+Future<DirectoryFrontmatter> _readDirectoryFrontmatter(Directory dir) async {
+  final fmFile = File(path.join(dir.path, '_directory.md'));
+  if (await fmFile.exists()) {
+    return readDirectoryFrontmatter(fmFile);
+  }
+  return const DirectoryFrontmatter();
 }

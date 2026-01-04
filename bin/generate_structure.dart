@@ -73,11 +73,18 @@ void _printUsage(ArgParser parser) {
     ..stdout(parser.usage);
 }
 
-Future<Map<String, dynamic>> _generateStructure(Directory root, int? maxDepth) async {
-  final rootCatalog = await scanDirectory(root, root.path, 0, maxDepth ?? maxDepthDefault);
+Future<Map<String, dynamic>> _generateStructure(
+  Directory root,
+  int? maxDepth,
+) async {
+  final rootCatalog = await scanDirectory(
+    root,
+    root.path,
+    0,
+    maxDepth ?? maxDepthDefault,
+  );
   return {
-    'root': root.path,
     'generated': DateTime.now().toIso8601String(),
-    'catalog': rootCatalog,
+    'directory': rootCatalog,
   };
 }
