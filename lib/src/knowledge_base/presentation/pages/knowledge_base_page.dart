@@ -49,7 +49,78 @@ class _KnowledgeBasePageState extends State<KnowledgeBasePage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (_showLeftPanel) ...[
-            const DirectoriesTreeWidget(items: [],),
+            const DirectoriesTreeWidget(
+              items: [
+                DirTreeItem(
+                  title: 'Getting Started',
+                  children: [
+                    DirTreeItem(title: 'Introduction'),
+                    DirTreeItem(title: 'Installation'),
+                    DirTreeItem(title: 'Quick Start'),
+                  ],
+                ),
+                DirTreeItem(
+                  title: 'API Documentation',
+                  children: [
+                    DirTreeItem(title: 'Authentication API'),
+                    DirTreeItem(title: 'Payments API'),
+                    DirTreeItem(
+                      title: 'User Management',
+                      children: [
+                        DirTreeItem(title: 'Create User'),
+                        DirTreeItem(title: 'Update User'),
+                        DirTreeItem(
+                          title: 'Delete User lorem ipsum se decoyntrum amet',
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                DirTreeItem(
+                  title: 'Architecture',
+                  children: [
+                    DirTreeItem(title: 'Overview'),
+                    DirTreeItem(title: 'Data Flow'),
+                    DirTreeItem(
+                      title: 'Infrastructure',
+                      children: [
+                        DirTreeItem(title: 'Terraform Notes'),
+                        DirTreeItem(
+                          title: 'Runbooks',
+                          children: [
+                            DirTreeItem(title: 'On-Call Guide'),
+                            DirTreeItem(title: 'Deployment'),
+                          ],
+                        ),
+                      ],
+                    ),
+                    DirTreeItem(
+                      title: 'Security',
+                      children: [
+                        DirTreeItem(title: 'Threat Model'),
+                        DirTreeItem(title: 'Best Practices'),
+                      ],
+                    ),
+                  ],
+                ),
+                DirTreeItem(
+                  title: 'Guides',
+                  children: [
+                    DirTreeItem(title: 'Local Development'),
+                    DirTreeItem(title: 'Testing Guide'),
+                    DirTreeItem(title: 'Deployment Guide'),
+                  ],
+                ),
+                DirTreeItem(
+                  title: 'Operations',
+                  children: [
+                    DirTreeItem(title: 'Incident Template'),
+                    DirTreeItem(title: 'Release Checklist'),
+                    DirTreeItem(title: 'Monitoring'),
+                  ],
+                ),
+              ],
+            ),
             const VerticalDivider(),
           ],
           const Expanded(flex: 3, child: CenterPanelWidget()),
@@ -64,19 +135,16 @@ class _KnowledgeBasePageState extends State<KnowledgeBasePage> {
               TOCItem(title: 'Token Refresh', heading: TOCHeading.h1),
               TOCItem(title: 'Endpoints', heading: TOCHeading.h2),
               TOCItem(title: 'POST /api/auth/login', heading: TOCHeading.h3),
-              TOCItem(
-                title: 'POST /api/auth/refresh',
-                heading: TOCHeading.h3,
-              ),
+              TOCItem(title: 'POST /api/auth/refresh', heading: TOCHeading.h3),
               TOCItem(title: 'POST /api/auth/logout', heading: TOCHeading.h1),
               TOCItem(title: 'GET /api/auth/me', heading: TOCHeading.h2),
-              TOCItem(
-                title: 'Security Considerations',
-                heading: TOCHeading.h3,
-              ),
+              TOCItem(title: 'Security Considerations', heading: TOCHeading.h3),
               TOCItem(title: 'Token Storage', heading: TOCHeading.h4),
               TOCItem(title: 'Rate Limiting', heading: TOCHeading.h5),
-              TOCItem(title: 'Password Requirements lorem ipsum dolor sit', heading: TOCHeading.h6),
+              TOCItem(
+                title: 'Password Requirements lorem ipsum dolor sit',
+                heading: TOCHeading.h6,
+              ),
             ],
           ),
         ],
