@@ -1,7 +1,7 @@
 import 'package:shadcn_flutter/shadcn_flutter.dart';
-import '../widgets/left_panel_widget.dart';
+import '../widgets/directories_tree_widget.dart';
 import '../widgets/center_panel_widget.dart';
-import '../widgets/table_of_content.dart';
+import '../widgets/table_of_content_widget.dart';
 import '../widgets/header_widget.dart';
 import '../widgets/footer_widget.dart';
 
@@ -49,38 +49,35 @@ class _KnowledgeBasePageState extends State<KnowledgeBasePage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (_showLeftPanel) ...[
-            const LeftPanelWidget(),
+            const DirectoriesTreeWidget(items: [],),
             const VerticalDivider(),
           ],
           const Expanded(flex: 3, child: CenterPanelWidget()),
           const VerticalDivider(),
-          const SizedBox(
-            width: 250,
-            child: TableOfContent(
-              activeItemIndex: 0,
-              items: [
-                TOCItem(title: 'Authentication API', heading: TOCHeading.h1),
-                TOCItem(title: 'Overview', heading: TOCHeading.h2),
-                TOCItem(title: 'Authentication Flow', heading: TOCHeading.h2),
-                TOCItem(title: 'Initial Login', heading: TOCHeading.h3),
-                TOCItem(title: 'Token Refresh', heading: TOCHeading.h1),
-                TOCItem(title: 'Endpoints', heading: TOCHeading.h2),
-                TOCItem(title: 'POST /api/auth/login', heading: TOCHeading.h3),
-                TOCItem(
-                  title: 'POST /api/auth/refresh',
-                  heading: TOCHeading.h3,
-                ),
-                TOCItem(title: 'POST /api/auth/logout', heading: TOCHeading.h1),
-                TOCItem(title: 'GET /api/auth/me', heading: TOCHeading.h2),
-                TOCItem(
-                  title: 'Security Considerations',
-                  heading: TOCHeading.h3,
-                ),
-                TOCItem(title: 'Token Storage', heading: TOCHeading.h4),
-                TOCItem(title: 'Rate Limiting', heading: TOCHeading.h5),
-                TOCItem(title: 'Password Requirements', heading: TOCHeading.h6),
-              ],
-            ),
+          TableOfContentWidget(
+            activeItemIndex: 0,
+            items: [
+              TOCItem(title: 'Authentication API', heading: TOCHeading.h1),
+              TOCItem(title: 'Overview', heading: TOCHeading.h2),
+              TOCItem(title: 'Authentication Flow', heading: TOCHeading.h2),
+              TOCItem(title: 'Initial Login', heading: TOCHeading.h3),
+              TOCItem(title: 'Token Refresh', heading: TOCHeading.h1),
+              TOCItem(title: 'Endpoints', heading: TOCHeading.h2),
+              TOCItem(title: 'POST /api/auth/login', heading: TOCHeading.h3),
+              TOCItem(
+                title: 'POST /api/auth/refresh',
+                heading: TOCHeading.h3,
+              ),
+              TOCItem(title: 'POST /api/auth/logout', heading: TOCHeading.h1),
+              TOCItem(title: 'GET /api/auth/me', heading: TOCHeading.h2),
+              TOCItem(
+                title: 'Security Considerations',
+                heading: TOCHeading.h3,
+              ),
+              TOCItem(title: 'Token Storage', heading: TOCHeading.h4),
+              TOCItem(title: 'Rate Limiting', heading: TOCHeading.h5),
+              TOCItem(title: 'Password Requirements lorem ipsum dolor sit', heading: TOCHeading.h6),
+            ],
           ),
         ],
       ),

@@ -1,4 +1,5 @@
 const double navigationSize = 48;
+const double sidePanelWidth = 280;
 
 class AppDuration {
   static const Duration short = Duration(milliseconds: 200);

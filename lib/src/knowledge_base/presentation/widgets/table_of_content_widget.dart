@@ -40,8 +40,8 @@ enum TOCHeading {
   }
 }
 
-class TableOfContent extends StatelessWidget {
-  const TableOfContent({
+class TableOfContentWidget extends StatelessWidget {
+  const TableOfContentWidget({
     required this.items,
     required this.activeItemIndex,
     super.key,
@@ -52,33 +52,36 @@ class TableOfContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          height: navigationSize,
-          alignment: Alignment.centerLeft,
-          padding: const EdgeInsets.symmetric(
-            horizontal: SizePadding.large,
-            vertical: SizePadding.base,
+    return SizedBox(
+      width: sidePanelWidth,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            height: navigationSize,
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.symmetric(
+              horizontal: SizePadding.large,
+              vertical: SizePadding.base,
+            ),
+            child: const Text('On This Page').semiBold().muted(),
           ),
-          child: const Text('On This Page').semiBold().muted(),
-        ),
-        const Divider(),
-        Expanded(
-          child: ListView.builder(
-            itemCount: items.length,
-            padding: EdgeInsets.all(SizePadding.base),
-            itemBuilder: (_, index) {
-              final item = items[index];
-              return _TocItem(
-                item: item,
-                isActive: index == activeItemIndex.clamp(0, items.length - 1),
-              );
-            },
+          const Divider(),
+          Expanded(
+            child: ListView.builder(
+              itemCount: items.length,
+              padding: EdgeInsets.all(SizePadding.base),
+              itemBuilder: (_, index) {
+                final item = items[index];
+                return _TocItem(
+                  item: item,
+                  isActive: index == activeItemIndex.clamp(0, items.length - 1),
+                );
+              },
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -121,6 +124,8 @@ class _TocItem extends StatelessWidget {
                         fontWeight: FontWeight.normal,
                         color: theme.colorScheme.foreground,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     )
                     .withPadding(
                       padding: EdgeInsets.only(

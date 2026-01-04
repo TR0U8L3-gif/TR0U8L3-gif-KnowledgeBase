@@ -1,13 +1,22 @@
+import 'package:knowledge_base/core/utils/constants.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
-class LeftPanelWidget extends StatefulWidget {
-  const LeftPanelWidget({super.key});
+class DirTreeItem {
+  final String title;
+  final List<DirTreeItem>? children;
 
-  @override
-  State<LeftPanelWidget> createState() => _LeftPanelWidgetState();
+  const DirTreeItem({required this.title, this.children});
 }
 
-class _LeftPanelWidgetState extends State<LeftPanelWidget> {
+class DirectoriesTreeWidget extends StatefulWidget {
+  const DirectoriesTreeWidget({required this.items, super.key});
+
+  final List<DirTreeItem> items;
+  @override
+  State<DirectoriesTreeWidget> createState() => _DirectoriesTreeWidgetState();
+}
+
+class _DirectoriesTreeWidgetState extends State<DirectoriesTreeWidget> {
   List<TreeNode<String>> treeItems = [
     TreeItem(
       data: 'Getting Started',
@@ -82,12 +91,13 @@ class _LeftPanelWidgetState extends State<LeftPanelWidget> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 280,
+      width: sidePanelWidth,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 12),
+            width: double.infinity,
             height: 48,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -113,10 +123,7 @@ class _LeftPanelWidgetState extends State<LeftPanelWidget> {
                         });
                       },
                       density: ButtonDensity.icon,
-                      child: const Icon(
-                        BootstrapIcons.arrowsCollapse,
-                        size: 14,
-                      ),
+                      child: const Icon(BootstrapIcons.arrowsCollapse, size: 14),
                     ),
                   ],
                 ),
