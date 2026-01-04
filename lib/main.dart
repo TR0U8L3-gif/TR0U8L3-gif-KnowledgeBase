@@ -1,4 +1,4 @@
-import 'package:knowledge_base/src/knowledge_base/presentation/page/knowledge_base_page.dart';
+import 'package:knowledge_base/src/knowledge_base/presentation/pages/knowledge_base_page.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 void main() {
