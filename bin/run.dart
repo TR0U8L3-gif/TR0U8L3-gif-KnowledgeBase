@@ -4,6 +4,7 @@ import 'package:cli_util/cli_logging.dart';
 import 'commands/structure_command.dart';
 import 'commands/move_command.dart';
 import 'commands/declare_command.dart';
+import 'commands/generate_command.dart';
 
 const String defaultAssetsDir = 'doc_assets';
 
@@ -12,7 +13,8 @@ void main(List<String> arguments) async {
     ..addFlag('help', abbr: 'h', help: 'Show help', negatable: false)
     ..addCommand('structure', _buildStructureParser())
     ..addCommand('move', _buildMoveParser())
-    ..addCommand('declare', _buildDeclareParser());
+    ..addCommand('declare', _buildDeclareParser())
+    ..addCommand('generate', _buildGenerateParser());
 
   try {
     final results = parser.parse(arguments);
@@ -31,6 +33,9 @@ void main(List<String> arguments) async {
         break;
       case 'declare':
         await _runDeclare(commandArgs);
+        break;
+      case 'generate':
+        await _runGenerate(commandArgs);
         break;
       case 'structure':
       default:
@@ -98,6 +103,39 @@ ArgParser _buildDeclareParser() {
       abbr: 'p',
       help: 'Path to pubspec.yaml',
       defaultsTo: 'pubspec.yaml',
+    );
+}
+
+ArgParser _buildGenerateParser() {
+  return ArgParser()
+    ..addOption(
+      'source',
+      abbr: 's',
+      help: 'Source directory to scan',
+      mandatory: true,
+    )
+    ..addOption(
+      'assets',
+      abbr: 'a',
+      help: 'Assets output directory',
+      defaultsTo: defaultAssetsDir,
+    )
+    ..addOption(
+      'pubspec',
+      abbr: 'p',
+      help: 'Path to pubspec.yaml',
+      defaultsTo: 'pubspec.yaml',
+    )
+    ..addOption(
+      'structure',
+      abbr: 'o',
+      help: 'Keep structure JSON file at this path (deleted by default)',
+    )
+    ..addOption(
+      'max-depth',
+      abbr: 'd',
+      help: 'Maximum directory depth to scan',
+      defaultsTo: '16',
     );
 }
 
@@ -169,26 +207,63 @@ Future<void> _runDeclare(ArgResults args) async {
   final progress = logger.progress('Updating pubspec.yaml');
 
   await declareCommand(
-    DeclareCommandInput(
-      assetsRoot: assetsRoot,
-      pubspecPath: pubspecPath,
-    ),
+    DeclareCommandInput(assetsRoot: assetsRoot, pubspecPath: pubspecPath),
   );
 
   progress.finish(showTiming: true);
   logger.stdout('Assets declared in: $pubspecPath');
 }
 
+Future<void> _runGenerate(ArgResults args) async {
+  final logger = Logger.standard();
+
+  final sourcePath = args['source'] as String?;
+  final assetsRoot = args['assets'] as String?;
+  final pubspecPath = args['pubspec'] as String?;
+  final structureOutputPath = args['structure'] as String?;
+  final maxDepth = (args['max-depth'] as String?) != null
+      ? int.tryParse(args['max-depth'] as String)
+      : null;
+
+  if (sourcePath == null || assetsRoot == null || pubspecPath == null) {
+    throw ArgumentError('Missing required --source, --assets, or --pubspec');
+  }
+
+  logger.stdout('Generating assets from $sourcePath to $assetsRoot');
+  final progress = logger.progress('Running all steps');
+
+  await generateCommand(
+    GenerateCommandInput(
+      sourcePath: sourcePath,
+      assetsRoot: assetsRoot,
+      pubspecPath: pubspecPath,
+      structureOutputPath: structureOutputPath,
+      maxDepth: maxDepth,
+    ),
+  );
+
+  progress.finish(showTiming: true);
+  logger.stdout('✓ Structure generated');
+  logger.stdout('✓ Assets copied to: $assetsRoot');
+  logger.stdout('✓ Assets declared in: $pubspecPath');
+}
+
 void _printUsage(ArgParser parser) {
   Logger.standard()
     ..stdout('Usage: dart run bin/run.dart <command> [options]')
     ..stdout('Commands:')
+    ..stdout(
+      '  generate   Run all steps: structure + move + declare (recommended)',
+    )
     ..stdout('  structure  Generate structure JSON (default if no command)')
     ..stdout('  move       Copy files to assets from a structure JSON')
     ..stdout('  declare    Add assets to pubspec.yaml')
     ..stdout('')
     ..stdout('Global options:')
     ..stdout(parser.usage)
+    ..stdout('')
+    ..stdout('Generate options:')
+    ..stdout(_buildGenerateParser().usage)
     ..stdout('')
     ..stdout('Structure options:')
     ..stdout(_buildStructureParser().usage)
