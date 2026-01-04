@@ -1,7 +1,7 @@
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import '../widgets/left_panel_widget.dart';
 import '../widgets/center_panel_widget.dart';
-import '../widgets/right_panel_widget.dart';
+import '../widgets/table_of_content.dart';
 import '../widgets/header_widget.dart';
 import '../widgets/footer_widget.dart';
 
@@ -54,7 +54,7 @@ class _KnowledgeBasePageState extends State<KnowledgeBasePage> {
           ],
           const Expanded(flex: 3, child: CenterPanelWidget()),
           const VerticalDivider(),
-          const SizedBox(width: 250, child: RightPanelWidget()),
+          const SizedBox(width: 250, child: TableOfContent()),
         ],
       ),
     );
