@@ -1,3 +1,13 @@
+---
+name: Platform Architecture Overview
+description: High-level platform architecture including runtime topology, availability targets and key design decisions
+display: true
+tags: ["architecture", "platform", "overview", "slo", "design"]
+image: null
+last_modified: 04.01.2026
+created: 03.01.2026
+---
+
 # Platform Architecture Overview
 
 ## At-a-glance

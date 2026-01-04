@@ -1,3 +1,13 @@
+---
+name: Authentication API
+description: Authentication endpoints including login, refresh, logout and user information
+display: true
+tags: ["api", "authentication", "security", "jwt"]
+image: null
+last_modified: 04.01.2026
+created: 03.01.2026
+---
+
 # Auth API
 
 ## Endpoints

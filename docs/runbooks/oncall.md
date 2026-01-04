@@ -1,3 +1,13 @@
+---
+name: On-Call Runbook
+description: On-call procedures including pager policy, triage flow and incident response checklist
+display: true
+tags: ["runbook", "oncall", "incident", "operations"]
+image: null
+last_modified: 04.01.2026
+created: 03.01.2026
+---
+
 # On-call Runbook
 
 ## Pager policy

@@ -1,3 +1,13 @@
+---
+name: Payments API
+description: Payment processing endpoints including intent creation, confirmation and webhooks
+display: true
+tags: ["api", "payments", "billing", "webhooks"]
+image: null
+last_modified: 04.01.2026
+created: 03.01.2026
+---
+
 # Payments API
 
 ## Endpoints

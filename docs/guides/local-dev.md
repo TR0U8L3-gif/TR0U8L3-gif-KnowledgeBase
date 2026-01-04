@@ -1,3 +1,13 @@
+---
+name: Local Development Guide
+description: Complete guide for setting up and running the platform locally with prerequisites and troubleshooting
+display: true
+tags: ["guide", "development", "setup", "docker", "flutter"]
+image: null
+last_modified: 04.01.2026
+created: 03.01.2026
+---
+
 # Local Development Guide
 
 ## Prereqs

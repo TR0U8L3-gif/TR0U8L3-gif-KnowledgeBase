@@ -1,3 +1,13 @@
+---
+name: Security Threat Model
+description: STRIDE-based threat model covering data classification, security controls and open security issues
+display: true
+tags: ["security", "threat-model", "stride", "compliance"]
+image: null
+last_modified: 04.01.2026
+created: 03.01.2026
+---
+
 # Threat Model
 
 ## Scope

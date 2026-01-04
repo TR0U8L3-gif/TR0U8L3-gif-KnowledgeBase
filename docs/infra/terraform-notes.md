@@ -1,3 +1,13 @@
+---
+name: Terraform Infrastructure Notes
+description: Terraform patterns, state management and deployment checklist for infrastructure as code
+display: true
+tags: ["infrastructure", "terraform", "iac", "deployment"]
+image: null
+last_modified: 04.01.2026
+created: 03.01.2026
+---
+
 # Terraform Notes
 
 ## Layout

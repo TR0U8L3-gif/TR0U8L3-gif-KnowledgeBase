@@ -1,0 +1,242 @@
+{
+  "root": "docs",
+  "generated": "2026-01-04T00:25:02.048340",
+  "catalog": {
+    "type": "catalog",
+    "name": "docs",
+    "path": ".",
+    "items": [
+      {
+        "type": "catalog",
+        "name": "api",
+        "path": "api",
+        "items": [
+          {
+            "type": "file",
+            "name": "_order.md",
+            "description": "Markdown documentation",
+            "tags": [
+              "documentation",
+              "markdown"
+            ],
+            "image": null,
+            "last_modified": "2026-01-04T00:12:55.485",
+            "created": "2026-01-04T00:12:55.485",
+            "size": 198,
+            "extension": "md"
+          },
+          {
+            "type": "file",
+            "name": "auth.md",
+            "description": "Markdown documentation",
+            "tags": [
+              "documentation",
+              "markdown"
+            ],
+            "image": null,
+            "last_modified": "2026-01-04T00:12:55.485",
+            "created": "2026-01-04T00:12:55.485",
+            "size": 1093,
+            "extension": "md"
+          },
+          {
+            "type": "file",
+            "name": "payments.md",
+            "description": "Markdown documentation",
+            "tags": [
+              "documentation",
+              "markdown"
+            ],
+            "image": null,
+            "last_modified": "2026-01-04T00:12:55.485",
+            "created": "2026-01-04T00:12:55.485",
+            "size": 1373,
+            "extension": "md"
+          }
+        ]
+      },
+      {
+        "type": "catalog",
+        "name": "architecture",
+        "path": "architecture",
+        "items": [
+          {
+            "type": "file",
+            "name": "_order.md",
+            "description": "Markdown documentation",
+            "tags": [
+              "documentation",
+              "markdown"
+            ],
+            "image": null,
+            "last_modified": "2026-01-04T00:12:55.485",
+            "created": "2026-01-04T00:12:55.485",
+            "size": 221,
+            "extension": "md"
+          },
+          {
+            "type": "file",
+            "name": "data-flow.md",
+            "description": "Markdown documentation",
+            "tags": [
+              "documentation",
+              "markdown"
+            ],
+            "image": null,
+            "last_modified": "2026-01-04T00:12:55.485",
+            "created": "2026-01-04T00:12:55.485",
+            "size": 1421,
+            "extension": "md"
+          },
+          {
+            "type": "file",
+            "name": "overview.md",
+            "description": "Markdown documentation",
+            "tags": [
+              "documentation",
+              "markdown"
+            ],
+            "image": null,
+            "last_modified": "2026-01-04T00:12:55.485",
+            "created": "2026-01-04T00:12:55.485",
+            "size": 1706,
+            "extension": "md"
+          }
+        ]
+      },
+      {
+        "type": "catalog",
+        "name": "guides",
+        "path": "guides",
+        "items": [
+          {
+            "type": "file",
+            "name": "local-dev.md",
+            "description": "Markdown documentation",
+            "tags": [
+              "documentation",
+              "markdown"
+            ],
+            "image": null,
+            "last_modified": "2026-01-04T00:12:55.497",
+            "created": "2026-01-04T00:12:55.497",
+            "size": 1268,
+            "extension": "md"
+          }
+        ]
+      },
+      {
+        "type": "catalog",
+        "name": "infra",
+        "path": "infra",
+        "items": [
+          {
+            "type": "file",
+            "name": "terraform-notes.md",
+            "description": "Markdown documentation",
+            "tags": [
+              "documentation",
+              "markdown"
+            ],
+            "image": null,
+            "last_modified": "2026-01-04T00:12:55.497",
+            "created": "2026-01-04T00:12:55.497",
+            "size": 1322,
+            "extension": "md"
+          }
+        ]
+      },
+      {
+        "type": "catalog",
+        "name": "ops",
+        "path": "ops",
+        "items": [
+          {
+            "type": "file",
+            "name": "_order.md",
+            "description": "Markdown documentation",
+            "tags": [
+              "documentation",
+              "markdown"
+            ],
+            "image": null,
+            "last_modified": "2026-01-04T00:12:55.505",
+            "created": "2026-01-04T00:12:55.505",
+            "size": 234,
+            "extension": "md"
+          },
+          {
+            "type": "file",
+            "name": "incident-template.md",
+            "description": "Markdown documentation",
+            "tags": [
+              "documentation",
+              "markdown"
+            ],
+            "image": null,
+            "last_modified": "2026-01-04T00:12:55.501",
+            "created": "2026-01-04T00:12:55.501",
+            "size": 760,
+            "extension": "md"
+          },
+          {
+            "type": "file",
+            "name": "release-checklist.md",
+            "description": "Markdown documentation",
+            "tags": [
+              "documentation",
+              "markdown"
+            ],
+            "image": null,
+            "last_modified": "2026-01-04T00:12:55.509",
+            "created": "2026-01-04T00:12:55.509",
+            "size": 935,
+            "extension": "md"
+          }
+        ]
+      },
+      {
+        "type": "catalog",
+        "name": "runbooks",
+        "path": "runbooks",
+        "items": [
+          {
+            "type": "file",
+            "name": "oncall.md",
+            "description": "Markdown documentation",
+            "tags": [
+              "documentation",
+              "markdown"
+            ],
+            "image": null,
+            "last_modified": "2026-01-04T00:12:55.509",
+            "created": "2026-01-04T00:12:55.509",
+            "size": 1294,
+            "extension": "md"
+          }
+        ]
+      },
+      {
+        "type": "catalog",
+        "name": "security",
+        "path": "security",
+        "items": [
+          {
+            "type": "file",
+            "name": "threat-model.md",
+            "description": "Markdown documentation",
+            "tags": [
+              "documentation",
+              "markdown"
+            ],
+            "image": null,
+            "last_modified": "2026-01-04T00:12:55.509",
+            "created": "2026-01-04T00:12:55.509",
+            "size": 1321,
+            "extension": "md"
+          }
+        ]
+      }
+    ]
+  }
+}

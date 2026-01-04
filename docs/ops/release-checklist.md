@@ -1,3 +1,13 @@
+---
+name: Release Checklist
+description: Step-by-step checklist for safe production releases including pre-flight, deploy and rollback procedures
+display: true
+tags: ["operations", "release", "deployment", "checklist"]
+image: null
+last_modified: 04.01.2026
+created: 03.01.2026
+---
+
 # Release Checklist
 
 ## Pre-flight

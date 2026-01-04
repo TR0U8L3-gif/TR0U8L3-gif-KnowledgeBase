@@ -1,3 +1,13 @@
+---
+name: Data Flow Architecture
+description: Event-driven data flow from API through Kafka to warehouse with ingestion rules and quality checks
+display: true
+tags: ["architecture", "data", "kafka", "warehouse", "events"]
+image: null
+last_modified: 04.01.2026
+created: 03.01.2026
+---
+
 # Data Flow (API to Warehouse)
 
 ## Sequence
