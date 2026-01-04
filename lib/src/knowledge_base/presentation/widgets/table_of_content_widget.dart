@@ -44,16 +44,18 @@ class TableOfContentWidget extends StatelessWidget {
   const TableOfContentWidget({
     required this.items,
     required this.activeItemIndex,
+    this.width,
     super.key,
   });
 
   final int activeItemIndex;
   final List<TOCItem> items;
+  final double? width;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: sidePanelWidth,
+      width: width ?? sidePanelWidth,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -103,7 +105,7 @@ class _TocItem extends StatelessWidget {
       child: Row(
         children: [
           AnimatedContainer(
-            duration: AppDuration.short,
+            duration: AppDuration.small,
             margin: const EdgeInsets.only(right: SizePadding.base),
             alignment: Alignment.centerLeft,
             width: SizePadding.base,
@@ -117,24 +119,30 @@ class _TocItem extends StatelessWidget {
           ),
           Expanded(
             child:
-                Text(
-                      item.title,
-                      style: TextStyle(
-                        fontSize: 14 - indentScale,
-                        fontWeight: FontWeight.normal,
-                        color: theme.colorScheme.foreground,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    )
-                    .withPadding(
-                      padding: EdgeInsets.only(
-                        left: indent * SizePadding.base - indentScale,
-                        top: SizePadding.small,
-                        bottom: SizePadding.small,
-                      ),
-                    )
-                    .withOpacity(isActive ? 1.0 : 0.8),
+                Tooltip(
+                  waitDuration: AppDuration.extraLarge,
+                  tooltip: TooltipContainer(
+                    child: Text(item.title),
+                  ).call,
+                  child: Text(
+                        item.title,
+                        style: TextStyle(
+                          fontSize: 14 - indentScale,
+                          fontWeight: FontWeight.normal,
+                          color: theme.colorScheme.foreground,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      )
+                      .withPadding(
+                        padding: EdgeInsets.only(
+                          left: indent * SizePadding.base - indentScale,
+                          top: SizePadding.small,
+                          bottom: SizePadding.small,
+                        ),
+                      )
+                      .withOpacity(isActive ? 1.0 : 0.8),
+                ),
           ),
         ],
       ),
