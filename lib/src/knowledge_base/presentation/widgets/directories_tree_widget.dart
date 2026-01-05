@@ -44,7 +44,7 @@ class _DirectoriesTreeWidgetState extends State<DirectoriesTreeWidget> {
         .map(
           (e) => TreeItem(
             data: e.title,
-            children: e.children != null ? _generateTreeItems(e.children!) : [],
+            children: e.children != null ? _generateTreeItems(e.children!) : <TreeItem<String>>[],
           ),
         )
         .toList();

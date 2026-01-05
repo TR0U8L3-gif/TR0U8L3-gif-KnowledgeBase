@@ -28,7 +28,8 @@ class _KnowledgeBasePageState extends State<KnowledgeBasePage> {
     return Scaffold(
       headers: [
         HeaderWidget(
-          onToggleLeftPanel: _toggleLeftPanel,
+          onToggleTheme: () {},
+          onToggleSidePanel: _toggleLeftPanel,
           showLeftPanel: _showLeftPanel,
         ),
         const Divider(),
