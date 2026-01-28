@@ -11,6 +11,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const ShadcnApp(
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(colorScheme: ColorSchemes.darkDefaultColor, radius: 0.5),
       home: KnowledgeBasePage(),
     );

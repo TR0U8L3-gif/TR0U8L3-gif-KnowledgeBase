@@ -6,7 +6,7 @@ import '../widgets/header_widget.dart';
 import '../widgets/footer_widget.dart';
 
 class KnowledgeBasePage extends StatefulWidget {
-  const KnowledgeBasePage({Key? key}) : super(key: key);
+  const KnowledgeBasePage({super.key});
 
   @override
   _KnowledgeBasePageState createState() => _KnowledgeBasePageState();
@@ -28,9 +28,10 @@ class _KnowledgeBasePageState extends State<KnowledgeBasePage> {
     return Scaffold(
       headers: [
         HeaderWidget(
-          onToggleTheme: () {},
+          onTapGithub: () {},
+          onSelectTheme: (theme) {},
           onToggleSidePanel: _toggleLeftPanel,
-          showLeftPanel: _showLeftPanel,
+          showSidePanel: _showLeftPanel,
         ),
         const Divider(),
       ],
