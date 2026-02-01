@@ -72,10 +72,6 @@ class _BreadcrumbContent extends StatelessWidget {
       textStyle,
     );
 
-    if (itemsToShow.length == 1) {
-      return _Container(height: height, child: _EllipsisText(items.first));
-    }
-
     return _Container(
       height: height,
       child: Row(children: _buildBreadcrumbItems(itemsToShow, sep, textStyle)),
@@ -91,15 +87,7 @@ class _BreadcrumbContent extends StatelessWidget {
     double separatorWidth,
     TextStyle textStyle,
   ) {
-    if (items.isEmpty) {
-      return [];
-    }
-
     final lastIndex = items.length - 1;
-
-    if (items.length == 1) {
-      return [0];
-    }
 
     final itemsToShow = <int>[lastIndex];
     final ellipsisWidth = TextHelper.calculateWidth(
