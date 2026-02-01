@@ -51,10 +51,17 @@ class _BreadcrumbContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final padding = 16.0 * 2;
-    final availableWidth = maxWidth - padding;
-    final scaling = Theme.of(context).scaling;
+    final theme = Theme.of(context);
+
+    final scaling = theme.scaling;
+    final textStyle = theme.typography.small.copyWith(
+      fontWeight: FontWeight.w500,
+      fontSize: 14 * scaling,
+    );
+
+    final availableWidth = maxWidth - 4;
     final separatorWidth = 12.0 + 16 * scaling;
+
     final sep = _ArrowSeparator(width: separatorWidth);
 
     final itemsToShow = _calculateItemsToShow(
@@ -62,6 +69,7 @@ class _BreadcrumbContent extends StatelessWidget {
       items,
       availableWidth,
       separatorWidth,
+      textStyle,
     );
 
     if (itemsToShow.length == 1) {
@@ -70,18 +78,19 @@ class _BreadcrumbContent extends StatelessWidget {
 
     return _Container(
       height: height,
-      child: Row(children: _buildBreadcrumbItems(itemsToShow, sep, null)),
+      child: Row(children: _buildBreadcrumbItems(itemsToShow, sep, textStyle)),
     );
   }
 
-  /// returns list of item indexes to show, -1 represents ellipsis
+  /// returns list of item indexes to display,
+  /// value -1 represents ellipsis
   List<int> _calculateItemsToShow(
     BuildContext context,
     List<String> items,
     double availableWidth,
-    double separatorWidth, [
-    TextStyle? style,
-  ]) {
+    double separatorWidth,
+    TextStyle textStyle,
+  ) {
     if (items.isEmpty) {
       return [];
     }
@@ -91,15 +100,23 @@ class _BreadcrumbContent extends StatelessWidget {
     if (items.length == 1) {
       return [0];
     }
-    final textStyle = style ?? DefaultTextStyle.of(context).style;
+
     final itemsToShow = <int>[lastIndex];
-    final ellipsisWidth = TextHelper.calculateWidth('...', textStyle);
+    final ellipsisWidth = TextHelper.calculateWidth(
+      context,
+      '...',
+      textStyle,
+      1,
+    );
     final lastItemWidth = TextHelper.calculateWidth(
+      context,
       items[lastIndex],
       textStyle,
+      1,
     );
     final firstItemWidth =
-        TextHelper.calculateWidth(items[0], textStyle) + separatorWidth;
+        TextHelper.calculateWidth(context, items[0], textStyle, 1) +
+        separatorWidth;
 
     double usedWidth = firstItemWidth + separatorWidth + lastItemWidth;
 
@@ -118,7 +135,8 @@ class _BreadcrumbContent extends StatelessWidget {
     int index = lastIndex - 1;
     for (index; index >= 1; index--) {
       final itemWidth =
-          TextHelper.calculateWidth(items[index], textStyle) + separatorWidth;
+          TextHelper.calculateWidth(context, items[index], textStyle, 1) +
+          separatorWidth;
 
       if (usedWidth + itemWidth < availableWidth) {
         itemsToShow.insert(1, index);
@@ -152,25 +170,21 @@ class _BreadcrumbContent extends StatelessWidget {
       final itemIndex = itemsToShow[i];
 
       if (itemIndex == -1) {
-        // Ellipsis
-        widgets.add(Text('...', style: style));
+        widgets.add(Text('...', style: style).muted());
       } else if (itemIndex == items.length - 1) {
-        // Last item always as text
         widgets.add(
           Flexible(child: _EllipsisText(items[itemIndex], style: style)),
         );
       } else {
-        // Other items as buttons
         widgets.add(
-          TextButton(
+          _TextButtonItem(
+            text: items[itemIndex],
             onPressed: () => onItemTapped?.call(itemIndex),
-            density: ButtonDensity.compact,
-            child: Text(items[itemIndex], style: style),
+            style: style,
           ),
         );
       }
 
-      // Add separator after each item except the last
       if (i < itemsToShow.length - 1) {
         widgets.add(separator);
       }
@@ -190,7 +204,7 @@ class _ArrowSeparator extends StatelessWidget {
     return Container(
       alignment: Alignment.center,
       width: width,
-      child: const Icon(RadixIcons.chevronRight).muted(),
+      child: const Icon(RadixIcons.chevronRight).iconXSmall.muted(),
     );
   }
 }
@@ -208,6 +222,27 @@ class _EllipsisText extends StatelessWidget {
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       style: style,
+    );
+  }
+}
+
+class _TextButtonItem extends StatelessWidget {
+  const _TextButtonItem({
+    required this.text,
+    required this.onPressed,
+    this.style,
+  });
+
+  final VoidCallback onPressed;
+  final String text;
+  final TextStyle? style;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      onPressed: onPressed,
+      density: ButtonDensity.compact,
+      child: Text(text, maxLines: 1, style: style),
     );
   }
 }
