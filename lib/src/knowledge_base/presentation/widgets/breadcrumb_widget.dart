@@ -120,8 +120,7 @@ class _BreadcrumbContent extends StatelessWidget {
       return itemsToShow;
     }
 
-    int index = lastIndex - 1;
-    for (index; index >= 1; index--) {
+    for (int index = lastIndex - 1; index >= 1; index--) {
       final itemWidth =
           TextHelper.calculateWidth(context, items[index], textStyle, 1) +
           separatorWidth;
