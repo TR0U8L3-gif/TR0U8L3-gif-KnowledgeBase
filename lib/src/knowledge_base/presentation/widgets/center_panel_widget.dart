@@ -1,3 +1,4 @@
+import 'package:knowledge_base/src/knowledge_base/presentation/widgets/breadcrumb_widget.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 class CenterPanelWidget extends StatelessWidget {
@@ -8,26 +9,17 @@ class CenterPanelWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          height: 48,
-          alignment: Alignment.centerLeft,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Breadcrumb(
-            separator: Breadcrumb.arrowSeparator,
-            children: [
-              TextButton(
-                onPressed: () {},
-                density: ButtonDensity.compact,
-                child: const Text('Home'),
-              ),
-              TextButton(
-                onPressed: () {},
-                density: ButtonDensity.compact,
-                child: const Text('API Documentation'),
-              ),
-              const Text('Authentication API'),
-            ],
-          ),
+        BreadcrumbWidget(
+          items: const [
+            'API Documentation 0',
+            'API Documentation 1',
+            'API Documentation 2',
+            'API Documentation 3',
+            'Authentication API',
+          ],
+          onItemTapped: (index) {
+            debugPrint('Tapped breadcrumb item at index: $index');
+          },
         ),
         const Divider(),
         Expanded(
