@@ -138,7 +138,7 @@ class _DocumentContentState extends State<_DocumentContent> {
     final notifier = widget.visibleHeadingsNotifier;
     if (notifier == null) return;
     if (_headingKeys.isEmpty) {
-      notifier.value = {};
+      if (notifier.value.isNotEmpty) notifier.value = {};
       return;
     }
 
@@ -193,7 +193,12 @@ class _DocumentContentState extends State<_DocumentContent> {
       }
     }
 
-    notifier.value = visibleIndices;
+    // Only notify when the set actually changed to avoid redundant rebuilds
+    final current = notifier.value;
+    if (current.length != visibleIndices.length ||
+        !current.containsAll(visibleIndices)) {
+      notifier.value = visibleIndices;
+    }
   }
 
   @override
