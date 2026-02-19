@@ -21,4 +21,15 @@ dev_dependencies:
   flutter_lints: ^5.0.0
 
 flutter:
+  assets:
+    - assets/data/api/auth.md
+    - assets/data/api/payments.md
+    - assets/data/architecture/data-flow.md
+    - assets/data/architecture/infra/runbooks/oncall.md
+    - assets/data/architecture/infra/terraform-notes.md
+    - assets/data/architecture/security/threat-model.md
+    - assets/data/guides/local-dev.md
+    - assets/data/index.json
+    - assets/data/ops/incident-template.md
+    - assets/data/ops/release-checklist.md
   uses-material-design: true
