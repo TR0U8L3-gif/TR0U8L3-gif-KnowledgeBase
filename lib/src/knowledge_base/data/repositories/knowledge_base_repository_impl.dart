@@ -64,6 +64,14 @@ class KnowledgeBaseRepositoryImpl implements KnowledgeBaseRepository {
     String targetPath,
     List<BreadcrumbEntry> result,
   ) {
+    // Target is this directory itself
+    if (item is DirectoryItem && item.path == targetPath) {
+      result.add(
+        BreadcrumbEntry(label: item.name, path: item.path, isFile: false),
+      );
+      return true;
+    }
+
     if (item is FileItem && item.path == targetPath) {
       result.add(
         BreadcrumbEntry(label: item.name, path: item.path, isFile: true),
@@ -73,23 +81,11 @@ class KnowledgeBaseRepositoryImpl implements KnowledgeBaseRepository {
 
     if (item is DirectoryItem) {
       for (final child in item.sortedItems) {
-        if (child.path == targetPath ||
-            (child is DirectoryItem &&
-                _findBreadcrumb(child, targetPath, result))) {
+        if (_findBreadcrumb(child, targetPath, result)) {
           result.insert(
             0,
             BreadcrumbEntry(label: item.name, path: item.path, isFile: false),
           );
-
-          if (child is FileItem && child.path == targetPath) {
-            result.add(
-              BreadcrumbEntry(
-                label: child.name,
-                path: child.path,
-                isFile: true,
-              ),
-            );
-          }
           return true;
         }
       }

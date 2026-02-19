@@ -43,6 +43,7 @@ class DirectoriesTreeWidget extends StatefulWidget {
     this.width,
     this.selectedFilePath,
     this.onFileSelected,
+    this.onDirectorySelected,
     super.key,
   });
 
@@ -50,6 +51,7 @@ class DirectoriesTreeWidget extends StatefulWidget {
   final double? width;
   final String? selectedFilePath;
   final ValueChanged<String>? onFileSelected;
+  final ValueChanged<String>? onDirectorySelected;
 
   @override
   State<DirectoriesTreeWidget> createState() => _DirectoriesTreeWidgetState();
@@ -103,31 +105,32 @@ class _DirectoriesTreeWidgetState extends State<DirectoriesTreeWidget> {
     });
   }
 
-  void _handleSelectionChanged(List<TreeNode<DirTreeItem>> updatedNodes) {
-    setState(() {
-      treeItems = updatedNodes;
-    });
-    final selectedFile = _findSelectedFile(updatedNodes);
-    if (selectedFile != null) {
-      widget.onFileSelected?.call(selectedFile.path);
-    }
-  }
+  /// Custom selection handler that only selects files, not directories.
+  /// Directories trigger a directory view instead.
+  void _handleSelectionChanged(
+    List<TreeNode<DirTreeItem>> selectedNodes,
+    bool multiSelect,
+    bool selected,
+  ) {
+    if (selectedNodes.isEmpty) return;
 
-  DirTreeItem? _findSelectedFile(List<TreeNode<DirTreeItem>> nodes) {
-    for (final node in nodes) {
-      if (node is TreeItem<DirTreeItem>) {
-        if (node.selected && node.data.isFile) {
-          return node.data;
-        }
-      }
-      if (node.children.isNotEmpty) {
-        final found = _findSelectedFile(
-          node.children.cast<TreeNode<DirTreeItem>>(),
-        );
-        if (found != null) return found;
-      }
+    final node = selectedNodes.first;
+    final DirTreeItem? item = node is TreeItem<DirTreeItem> ? node.data : null;
+    if (item == null) return;
+
+    if (item.isFile) {
+      // Select the file: highlight it in the tree and notify parent
+      setState(() {
+        treeItems = treeItems.setSelectedNodes(selectedNodes);
+      });
+      widget.onFileSelected?.call(item.path);
+    } else {
+      // Directory click: deselect everything, notify parent about directory
+      setState(() {
+        treeItems = treeItems.deselectAll();
+      });
+      widget.onDirectorySelected?.call(item.path);
     }
-    return null;
   }
 
   @override
@@ -177,10 +180,7 @@ class _DirectoriesTreeWidgetState extends State<DirectoriesTreeWidget> {
           Expanded(
             child: TreeView<DirTreeItem>(
               nodes: treeItems,
-              onSelectionChanged: TreeView.defaultSelectionHandler<DirTreeItem>(
-                treeItems,
-                _handleSelectionChanged,
-              ),
+              onSelectionChanged: _handleSelectionChanged,
               builder: (context, node) {
                 return TreeItemView(
                   leading: node.data.isFile

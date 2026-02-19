@@ -20,9 +20,12 @@ class KnowledgeBasePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocListener<NavigationBloc, NavigationState>(
-      listenWhen: (prev, curr) => prev.selectedFile != curr.selectedFile,
+      listenWhen: (prev, curr) =>
+          prev.selectedFile != curr.selectedFile ||
+          prev.viewMode != curr.viewMode,
       listener: (context, state) {
-        if (state.selectedFile != null) {
+        // When a file is selected and viewMode is file, load the document
+        if (state.viewMode == ViewMode.file && state.selectedFile != null) {
           context.read<DocumentBloc>().add(
             LoadDocument(state.selectedFile!.path),
           );
@@ -104,28 +107,34 @@ class _KnowledgeBaseView extends StatelessWidget {
             onFileSelected: (path) {
               context.read<NavigationBloc>().add(SelectFile(path));
             },
+            onDirectorySelected: (path) {
+              context.read<NavigationBloc>().add(SelectDirectory(path));
+            },
           ),
           const VerticalDivider(),
         ],
         const Expanded(flex: 3, child: CenterPanelWidget()),
-        const VerticalDivider(),
-        BlocBuilder<DocumentBloc, DocumentState>(
-          buildWhen: (prev, curr) => prev.content != curr.content,
-          builder: (context, docState) {
-            final headings = docState.content?.headings ?? [];
-            return TableOfContentWidget(
-              activeItemIndex: 0,
-              items: headings
-                  .map(
-                    (h) => TOCItem(
-                      title: h.title,
-                      heading: TOCHeading.fromLevel(h.level),
-                    ),
-                  )
-                  .toList(),
-            );
-          },
-        ),
+        // Only show TOC when viewing a file document
+        if (navState.viewMode == ViewMode.file) ...[
+          const VerticalDivider(),
+          BlocBuilder<DocumentBloc, DocumentState>(
+            buildWhen: (prev, curr) => prev.content != curr.content,
+            builder: (context, docState) {
+              final headings = docState.content?.headings ?? [];
+              return TableOfContentWidget(
+                activeItemIndex: 0,
+                items: headings
+                    .map(
+                      (h) => TOCItem(
+                        title: h.title,
+                        heading: TOCHeading.fromLevel(h.level),
+                      ),
+                    )
+                    .toList(),
+              );
+            },
+          ),
+        ],
       ],
     );
   }

@@ -5,10 +5,12 @@ import 'package:knowledge_base/src/knowledge_base/presentation/bloc/navigation/n
 import 'package:knowledge_base/src/knowledge_base/presentation/bloc/navigation/navigation_event.dart';
 import 'package:knowledge_base/src/knowledge_base/presentation/bloc/navigation/navigation_state.dart';
 import 'package:knowledge_base/src/knowledge_base/presentation/widgets/breadcrumb_widget.dart';
+import 'package:knowledge_base/src/knowledge_base/presentation/widgets/directory_view_widget.dart';
 import 'package:knowledge_base/src/knowledge_base/presentation/widgets/markdown_renderer_widget.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
-/// Center panel displaying breadcrumb navigation and rendered document content.
+/// Center panel displaying breadcrumb navigation and rendered document content
+/// or directory view depending on the current [ViewMode].
 class CenterPanelWidget extends StatelessWidget {
   const CenterPanelWidget({super.key});
 
@@ -31,29 +33,51 @@ class CenterPanelWidget extends StatelessWidget {
         ),
         const Divider(),
         Expanded(
-          child: BlocBuilder<DocumentBloc, DocumentState>(
-            builder: (context, docState) {
-              return switch (docState.status) {
-                DocumentStatus.initial => const Center(
-                  child: Text('Select a document from the tree'),
-                ),
-                DocumentStatus.loading => const Center(
-                  child: CircularProgressIndicator(),
-                ),
-                DocumentStatus.error => Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(BootstrapIcons.exclamationTriangle),
-                      const Gap(8),
-                      Text(
-                        docState.errorMessage ?? 'Failed to load document',
-                      ).muted(),
-                    ],
-                  ),
-                ),
-                DocumentStatus.loaded => _DocumentContent(docState: docState),
-              };
+          child: BlocBuilder<NavigationBloc, NavigationState>(
+            buildWhen: (prev, curr) =>
+                prev.viewMode != curr.viewMode ||
+                prev.selectedDirectory != curr.selectedDirectory ||
+                prev.selectedFile != curr.selectedFile,
+            builder: (context, navState) {
+              if (navState.viewMode == ViewMode.directory &&
+                  navState.selectedDirectory != null) {
+                return DirectoryViewWidget(
+                  directory: navState.selectedDirectory!,
+                  onFileSelected: (path) {
+                    context.read<NavigationBloc>().add(SelectFile(path));
+                  },
+                  onDirectorySelected: (path) {
+                    context.read<NavigationBloc>().add(SelectDirectory(path));
+                  },
+                );
+              }
+              return BlocBuilder<DocumentBloc, DocumentState>(
+                builder: (context, docState) {
+                  return switch (docState.status) {
+                    DocumentStatus.initial => const Center(
+                      child: Text('Select a document from the tree'),
+                    ),
+                    DocumentStatus.loading => const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                    DocumentStatus.error => Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(BootstrapIcons.exclamationTriangle),
+                          const Gap(8),
+                          Text(
+                            docState.errorMessage ?? 'Failed to load document',
+                          ).muted(),
+                        ],
+                      ),
+                    ),
+                    DocumentStatus.loaded => _DocumentContent(
+                      docState: docState,
+                    ),
+                  };
+                },
+              );
             },
           ),
         ),

@@ -14,6 +14,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
       super(const NavigationState()) {
     on<LoadIndex>(_onLoadIndex);
     on<SelectFile>(_onSelectFile);
+    on<SelectDirectory>(_onSelectDirectory);
     on<NavigateToBreadcrumb>(_onNavigateToBreadcrumb);
     on<ToggleSidePanel>(_onToggleSidePanel);
     on<ChangePage>(_onChangePage);
@@ -73,8 +74,32 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     emit(
       state.copyWith(
         selectedFile: file,
+        viewMode: ViewMode.file,
+        clearSelectedDirectory: true,
         breadcrumb: breadcrumb,
         currentPage: pageIndex >= 0 ? pageIndex + 1 : state.currentPage,
+      ),
+    );
+  }
+
+  void _onSelectDirectory(
+    SelectDirectory event,
+    Emitter<NavigationState> emit,
+  ) {
+    final root = state.rootDirectory;
+    if (root == null) return;
+
+    final directory = _findDirectoryByPath(root, event.directoryPath);
+    if (directory == null) return;
+
+    final breadcrumb = _repository.computeBreadcrumb(root, event.directoryPath);
+
+    emit(
+      state.copyWith(
+        selectedDirectory: directory,
+        viewMode: ViewMode.directory,
+        clearSelectedFile: true,
+        breadcrumb: breadcrumb,
       ),
     );
   }
@@ -87,6 +112,8 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
       final entry = state.breadcrumb[event.index];
       if (entry.isFile) {
         add(SelectFile(entry.path));
+      } else {
+        add(SelectDirectory(entry.path));
       }
     }
   }
@@ -111,6 +138,17 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     if (item is DirectoryItem) {
       for (final child in item.items) {
         final found = _findFileByPath(child, path);
+        if (found != null) return found;
+      }
+    }
+    return null;
+  }
+
+  DirectoryItem? _findDirectoryByPath(KnowledgeBaseItem item, String path) {
+    if (item is DirectoryItem) {
+      if (item.path == path) return item;
+      for (final child in item.items) {
+        final found = _findDirectoryByPath(child, path);
         if (found != null) return found;
       }
     }

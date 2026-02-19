@@ -13,6 +13,12 @@ final class SelectFile extends NavigationEvent {
   const SelectFile(this.filePath);
 }
 
+/// Triggered when a directory (folder) is clicked in the tree.
+final class SelectDirectory extends NavigationEvent {
+  final String directoryPath;
+  const SelectDirectory(this.directoryPath);
+}
+
 /// Triggered when a breadcrumb directory entry is tapped.
 final class NavigateToBreadcrumb extends NavigationEvent {
   final int index;
