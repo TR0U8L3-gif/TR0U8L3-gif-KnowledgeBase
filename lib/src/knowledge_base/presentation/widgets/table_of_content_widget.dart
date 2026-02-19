@@ -43,12 +43,12 @@ enum TOCHeading {
 class TableOfContentWidget extends StatelessWidget {
   const TableOfContentWidget({
     required this.items,
-    required this.activeItemIndex,
+    required this.activeItemIndices,
     this.width,
     super.key,
   });
 
-  final int activeItemIndex;
+  final Set<int> activeItemIndices;
   final List<TOCItem> items;
   final double? width;
 
@@ -77,7 +77,7 @@ class TableOfContentWidget extends StatelessWidget {
                 final item = items[index];
                 return _TocItem(
                   item: item,
-                  isActive: index == activeItemIndex.clamp(0, items.length - 1),
+                  isActive: activeItemIndices.contains(index),
                 );
               },
             ),
@@ -118,13 +118,11 @@ class _TocItem extends StatelessWidget {
                   ),
           ),
           Expanded(
-            child:
-                Tooltip(
-                  waitDuration: AppDuration.extraLarge,
-                  tooltip: TooltipContainer(
-                    child: Text(item.title),
-                  ).call,
-                  child: Text(
+            child: Tooltip(
+              waitDuration: AppDuration.extraLarge,
+              tooltip: TooltipContainer(child: Text(item.title)).call,
+              child:
+                  Text(
                         item.title,
                         style: TextStyle(
                           fontSize: 14 - indentScale,
@@ -142,7 +140,7 @@ class _TocItem extends StatelessWidget {
                         ),
                       )
                       .withOpacity(isActive ? 1.0 : 0.8),
-                ),
+            ),
           ),
         ],
       ),

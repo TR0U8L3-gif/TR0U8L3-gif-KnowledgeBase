@@ -36,8 +36,21 @@ class KnowledgeBasePage extends StatelessWidget {
   }
 }
 
-class _KnowledgeBaseView extends StatelessWidget {
+class _KnowledgeBaseView extends StatefulWidget {
   const _KnowledgeBaseView();
+
+  @override
+  State<_KnowledgeBaseView> createState() => _KnowledgeBaseViewState();
+}
+
+class _KnowledgeBaseViewState extends State<_KnowledgeBaseView> {
+  final ValueNotifier<Set<int>> _visibleHeadingsNotifier = ValueNotifier({});
+
+  @override
+  void dispose() {
+    _visibleHeadingsNotifier.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -113,7 +126,12 @@ class _KnowledgeBaseView extends StatelessWidget {
           ),
           const VerticalDivider(),
         ],
-        const Expanded(flex: 3, child: CenterPanelWidget()),
+        Expanded(
+          flex: 3,
+          child: CenterPanelWidget(
+            visibleHeadingsNotifier: _visibleHeadingsNotifier,
+          ),
+        ),
         // Only show TOC when viewing a file document
         if (navState.viewMode == ViewMode.file) ...[
           const VerticalDivider(),
@@ -121,16 +139,21 @@ class _KnowledgeBaseView extends StatelessWidget {
             buildWhen: (prev, curr) => prev.content != curr.content,
             builder: (context, docState) {
               final headings = docState.content?.headings ?? [];
-              return TableOfContentWidget(
-                activeItemIndex: 0,
-                items: headings
-                    .map(
-                      (h) => TOCItem(
-                        title: h.title,
-                        heading: TOCHeading.fromLevel(h.level),
-                      ),
-                    )
-                    .toList(),
+              return ValueListenableBuilder<Set<int>>(
+                valueListenable: _visibleHeadingsNotifier,
+                builder: (context, visibleIndices, _) {
+                  return TableOfContentWidget(
+                    activeItemIndices: visibleIndices,
+                    items: headings
+                        .map(
+                          (h) => TOCItem(
+                            title: h.title,
+                            heading: TOCHeading.fromLevel(h.level),
+                          ),
+                        )
+                        .toList(),
+                  );
+                },
               );
             },
           ),

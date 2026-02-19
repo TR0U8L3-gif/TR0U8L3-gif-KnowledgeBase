@@ -55,18 +55,34 @@ class MarkdownRendererWidget extends StatelessWidget {
   final String? title;
   final String? description;
   final DateTime? lastModified;
+  final List<GlobalKey>? headingKeys;
 
   const MarkdownRendererWidget({
     required this.markdown,
     this.title,
     this.description,
     this.lastModified,
+    this.headingKeys,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
     final blocks = _parseMarkdown(markdown);
+
+    int headingIndex = 0;
+    final blockWidgets = <Widget>[];
+    for (final block in blocks) {
+      Widget widget = _buildBlock(context, block);
+      if (block is _HeadingBlock &&
+          headingKeys != null &&
+          headingIndex < headingKeys!.length) {
+        widget = KeyedSubtree(key: headingKeys![headingIndex], child: widget);
+        headingIndex++;
+      }
+      blockWidgets.add(widget);
+      blockWidgets.add(const Gap(16));
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -77,9 +93,7 @@ class MarkdownRendererWidget extends StatelessWidget {
           const Gap(8),
         ],
         if (description != null) ...[Text(description!).lead(), const Gap(24)],
-        ...blocks.expand(
-          (block) => [_buildBlock(context, block), const Gap(16)],
-        ),
+        ...blockWidgets,
       ],
     );
   }
