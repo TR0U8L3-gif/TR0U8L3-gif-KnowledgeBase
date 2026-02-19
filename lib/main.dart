@@ -5,6 +5,8 @@ import 'package:knowledge_base/src/knowledge_base/domain/repositories/knowledge_
 import 'package:knowledge_base/src/knowledge_base/presentation/bloc/document/document_bloc.dart';
 import 'package:knowledge_base/src/knowledge_base/presentation/bloc/navigation/navigation_bloc.dart';
 import 'package:knowledge_base/src/knowledge_base/presentation/bloc/navigation/navigation_event.dart';
+import 'package:knowledge_base/src/knowledge_base/presentation/bloc/theme/theme_cubit.dart';
+import 'package:knowledge_base/src/knowledge_base/presentation/bloc/theme/theme_state.dart';
 import 'package:knowledge_base/src/knowledge_base/presentation/pages/knowledge_base_page.dart';
 import 'package:provider/provider.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
@@ -35,14 +37,28 @@ class MainApp extends StatelessWidget {
               BlocProvider<DocumentBloc>(
                 create: (_) => DocumentBloc(repository: repository),
               ),
+              BlocProvider<ThemeCubit>(create: (_) => ThemeCubit()),
             ],
-            child: const ShadcnApp(
-              debugShowCheckedModeBanner: false,
-              theme: ThemeData(
-                colorScheme: ColorSchemes.darkDefaultColor,
-                radius: 0.5,
-              ),
-              home: KnowledgeBasePage(),
+            child: BlocBuilder<ThemeCubit, ThemeState>(
+              builder: (context, themeState) {
+                final brightness = MediaQuery.platformBrightnessOf(context);
+                final isDark = switch (themeState.themeMode) {
+                  ThemeMode.system => brightness == Brightness.dark,
+                  ThemeMode.dark => true,
+                  ThemeMode.light => false,
+                };
+
+                return ShadcnApp(
+                  debugShowCheckedModeBanner: false,
+                  theme: ThemeData(
+                    colorScheme: isDark
+                        ? ColorSchemes.darkDefaultColor
+                        : ColorSchemes.lightDefaultColor,
+                    radius: 0.5,
+                  ),
+                  home: const KnowledgeBasePage(),
+                );
+              },
             ),
           );
         },

@@ -5,8 +5,10 @@ import 'package:knowledge_base/src/knowledge_base/presentation/bloc/document/doc
 import 'package:knowledge_base/src/knowledge_base/presentation/bloc/navigation/navigation_bloc.dart';
 import 'package:knowledge_base/src/knowledge_base/presentation/bloc/navigation/navigation_event.dart';
 import 'package:knowledge_base/src/knowledge_base/presentation/bloc/navigation/navigation_state.dart';
+import 'package:knowledge_base/src/knowledge_base/presentation/bloc/theme/theme_cubit.dart';
 import 'package:knowledge_base/src/knowledge_base/presentation/widgets/table_of_content_widget.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../widgets/directories_tree_widget.dart';
 import '../widgets/center_panel_widget.dart';
@@ -59,11 +61,23 @@ class _KnowledgeBaseViewState extends State<_KnowledgeBaseView> {
         return Scaffold(
           headers: [
             HeaderWidget(
-              onTapGithub: () {},
-              onSelectTheme: (theme) {},
+              onTapGithub: () {
+                launchUrl(
+                  Uri.parse('https://github.com/TR0U8L3-gif'),
+                  mode: LaunchMode.platformDefault,
+                  webOnlyWindowName: '_blank',
+                );
+              },
+              onSelectTheme: (theme) {
+                context.read<ThemeCubit>().setThemeMode(theme);
+              },
               onToggleSidePanel: () {
                 context.read<NavigationBloc>().add(const ToggleSidePanel());
               },
+              onSearchResultSelected: (filePath) {
+                context.read<NavigationBloc>().add(SelectFile(filePath));
+              },
+              allFiles: navState.allFiles,
               showSidePanel: navState.showSidePanel,
             ),
             const Divider(),
