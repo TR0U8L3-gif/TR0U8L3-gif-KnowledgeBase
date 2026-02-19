@@ -1,6 +1,14 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:knowledge_base/src/knowledge_base/presentation/bloc/document/document_bloc.dart';
+import 'package:knowledge_base/src/knowledge_base/presentation/bloc/document/document_state.dart';
+import 'package:knowledge_base/src/knowledge_base/presentation/bloc/navigation/navigation_bloc.dart';
+import 'package:knowledge_base/src/knowledge_base/presentation/bloc/navigation/navigation_event.dart';
+import 'package:knowledge_base/src/knowledge_base/presentation/bloc/navigation/navigation_state.dart';
 import 'package:knowledge_base/src/knowledge_base/presentation/widgets/breadcrumb_widget.dart';
+import 'package:knowledge_base/src/knowledge_base/presentation/widgets/markdown_renderer_widget.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
+/// Center panel displaying breadcrumb navigation and rendered document content.
 class CenterPanelWidget extends StatelessWidget {
   const CenterPanelWidget({super.key});
 
@@ -9,121 +17,77 @@ class CenterPanelWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        BreadcrumbWidget(
-          items: const [
-            'API Documentation 0',
-            'API Documentation 1',
-            'API Documentation 2',
-            'API Documentation 3',
-            'Authentication API',
-          ],
-          onItemTapped: (index) {
-            debugPrint('Tapped breadcrumb item at index: $index');
+        BlocBuilder<NavigationBloc, NavigationState>(
+          buildWhen: (prev, curr) => prev.breadcrumb != curr.breadcrumb,
+          builder: (context, navState) {
+            final labels = navState.breadcrumb.map((e) => e.label).toList();
+            return BreadcrumbWidget(
+              items: labels,
+              onItemTapped: (index) {
+                context.read<NavigationBloc>().add(NavigateToBreadcrumb(index));
+              },
+            );
           },
         ),
         const Divider(),
         Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Authentication API').h1(),
-                const Gap(8),
-                const Text('Last updated: January 4, 2026').muted().small(),
-                const Gap(24),
-                const Text(
-                  'Authentication endpoints including login, refresh, logout and user information retrieval.',
-                ).lead(),
-                const Gap(32),
-                const Text('Overview').h2(),
-                const Gap(12),
-                const Text(
-                  'The Authentication API provides a comprehensive set of endpoints for managing user authentication and sessions. '
-                  'It supports JWT-based authentication with refresh token rotation and secure session management.',
-                ).p(),
-                const Gap(16),
-                const Text(
-                  'All endpoints require HTTPS and return JSON responses. Authentication tokens are issued as HTTP-only cookies '
-                  'for enhanced security.',
-                ).p(),
-                const Gap(32),
-                const Text('Authentication Flow').h2(),
-                const Gap(12),
-                const Text('Initial Login').h3(),
-                const Gap(8),
-                const Text(
-                  '1. User submits credentials to /api/auth/login\n'
-                  '2. Server validates credentials\n'
-                  '3. Server issues access token (15min) and refresh token (7 days)\n'
-                  '4. Tokens stored as HTTP-only cookies',
-                ).p(),
-                const Gap(24),
-                const Text('Token Refresh').h3(),
-                const Gap(8),
-                const Text(
-                  'Access tokens expire after 15 minutes. The client should monitor the token expiration '
-                  'and request a new access token using the refresh token before expiration.',
-                ).p(),
-                const Gap(32),
-                const Text('Endpoints').h2(),
-                const Gap(12),
-                const Text('POST /api/auth/login').h3(),
-                const Gap(8),
-                const Text('Authenticate a user and receive tokens.').p(),
-                const Gap(8),
-                OutlinedContainer(
-                  child: const Text(
-                    '{\n'
-                    '  "email": "user@example.com",\n'
-                    '  "password": "secure_password"\n'
-                    '}',
-                  ).p(),
+          child: BlocBuilder<DocumentBloc, DocumentState>(
+            builder: (context, docState) {
+              return switch (docState.status) {
+                DocumentStatus.initial => const Center(
+                  child: Text('Select a document from the tree'),
                 ),
-                const Gap(24),
-                const Text('POST /api/auth/refresh').h3(),
-                const Gap(8),
-                const Text('Refresh an expired access token.').p(),
-                const Gap(24),
-                const Text('POST /api/auth/logout').h3(),
-                const Gap(8),
-                const Text(
-                  'Invalidate the current session and clear authentication cookies.',
-                ).p(),
-                const Gap(24),
-                const Text('GET /api/auth/me').h3(),
-                const Gap(8),
-                const Text(
-                  'Retrieve the currently authenticated user information.',
-                ).p(),
-                const Gap(32),
-                const Text('Security Considerations').h2(),
-                const Gap(12),
-                const Text('Token Storage').h4(),
-                const Gap(8),
-                const Text(
-                  'Tokens are stored as HTTP-only cookies to prevent XSS attacks. The SameSite attribute '
-                  'is set to Strict to prevent CSRF attacks.',
-                ).p(),
-                const Gap(16),
-                const Text('Rate Limiting').h4(),
-                const Gap(8),
-                const Text(
-                  'Login attempts are rate-limited to 5 attempts per 15 minutes per IP address. '
-                  'After exceeding the limit, the IP is temporarily blocked.',
-                ).p(),
-                const Gap(16),
-                const Text('Password Requirements').h4(),
-                const Gap(8),
-                const Text(
-                  'Passwords must be at least 12 characters long and include uppercase, lowercase, '
-                  'numbers, and special characters.',
-                ).p(),
-              ],
-            ),
+                DocumentStatus.loading => const Center(
+                  child: CircularProgressIndicator(),
+                ),
+                DocumentStatus.error => Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(BootstrapIcons.exclamationTriangle),
+                      const Gap(8),
+                      Text(
+                        docState.errorMessage ?? 'Failed to load document',
+                      ).muted(),
+                    ],
+                  ),
+                ),
+                DocumentStatus.loaded => _DocumentContent(docState: docState),
+              };
+            },
           ),
         ),
       ],
+    );
+  }
+}
+
+class _DocumentContent extends StatelessWidget {
+  final DocumentState docState;
+
+  const _DocumentContent({required this.docState});
+
+  @override
+  Widget build(BuildContext context) {
+    final content = docState.content;
+    if (content == null) {
+      return const Center(child: Text('No content available'));
+    }
+
+    return BlocBuilder<NavigationBloc, NavigationState>(
+      buildWhen: (prev, curr) => prev.selectedFile != curr.selectedFile,
+      builder: (context, navState) {
+        final file = navState.selectedFile;
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: MarkdownRendererWidget(
+            markdown: content.rawMarkdown,
+            title: file?.name,
+            description: file?.description,
+            lastModified: file?.lastModified,
+          ),
+        );
+      },
     );
   }
 }
