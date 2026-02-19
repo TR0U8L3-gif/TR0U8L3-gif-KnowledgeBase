@@ -17,6 +17,19 @@ class DirTreeItem {
     this.children,
   });
 
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DirTreeItem &&
+          runtimeType == other.runtimeType &&
+          title == other.title &&
+          path == other.path &&
+          isFile == other.isFile &&
+          listEquals(children, other.children);
+
+  @override
+  int get hashCode => Object.hash(title, path, isFile);
+
   /// Creates tree items from domain [KnowledgeBaseItem] entities.
   static List<DirTreeItem> fromKnowledgeBaseItems(
     List<KnowledgeBaseItem> items,
@@ -205,10 +218,13 @@ class _DirectoriesTreeWidgetState extends State<DirectoriesTreeWidget> {
                     tooltip: TooltipContainer(
                       child: Text(node.data.title),
                     ).call,
-                    child: Text(
-                      node.data.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    child: GestureDetector(
+                      onTap: () => _handleSelectionChanged([node], false, true),
+                      child: Text(
+                        node.data.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ),
                 );
