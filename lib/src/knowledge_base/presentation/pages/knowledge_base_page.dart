@@ -179,7 +179,6 @@ class _KnowledgeBaseViewState extends State<_KnowledgeBaseView> {
                   context.read<ThemeCubit>().setThemeMode(theme);
                 },
                 onToggleSidePanel: () {
-                  // On mobile/tablet → open drawer, on desktop → toggle inline
                   if (screen != ScreenSize.mobile) {
                     context.read<NavigationBloc>().add(const ToggleSidePanel());
                   } else {
@@ -189,11 +188,16 @@ class _KnowledgeBaseViewState extends State<_KnowledgeBaseView> {
                 onSearchResultSelected: (filePath) {
                   context.read<NavigationBloc>().add(SelectFile(filePath));
                 },
-                onTocPressed: screen != ScreenSize.desktop
-                    ? () => _openTocDrawer(context)
-                    : null,
+                onToggleTocPanel: () {
+                  if (screen != ScreenSize.mobile) {
+                    context.read<NavigationBloc>().add(const ToggleTocPanel());
+                  } else {
+                    _openTocDrawer(context);
+                  }
+                },
                 allFiles: navState.allFiles,
                 showSidePanel: navState.showSidePanel,
+                showTocPanel: navState.showTocPanel,
                 screenSize: screen,
               ),
               const Divider(),
@@ -290,9 +294,10 @@ class _KnowledgeBaseViewState extends State<_KnowledgeBaseView> {
             visibleHeadingsNotifier: _visibleHeadingsNotifier,
           ),
         ),
-        // TOC: only on desktop when viewing a file
+        // TOC: on desktop/tablet when viewing a file and showTocPanel is true
         if (navState.viewMode == ViewMode.file &&
-            screen == ScreenSize.desktop) ...[
+            navState.showTocPanel &&
+            screen != ScreenSize.mobile) ...[
           const VerticalDivider(),
           Semantics(
             label: 'Table of contents',

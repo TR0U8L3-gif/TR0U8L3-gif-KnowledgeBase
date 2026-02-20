@@ -18,6 +18,7 @@ final class NavigationState extends Equatable {
   final List<FileItem> allFiles;
   final int currentPage;
   final bool showSidePanel;
+  final bool showTocPanel;
   final String? errorMessage;
 
   const NavigationState({
@@ -30,6 +31,7 @@ final class NavigationState extends Equatable {
     this.allFiles = const [],
     this.currentPage = 1,
     this.showSidePanel = true,
+    this.showTocPanel = true,
     this.errorMessage,
   });
 
@@ -51,6 +53,7 @@ final class NavigationState extends Equatable {
     List<FileItem>? allFiles,
     int? currentPage,
     bool? showSidePanel,
+    bool? showTocPanel,
     String? errorMessage,
     bool clearSelectedFile = false,
     bool clearSelectedDirectory = false,
@@ -69,6 +72,7 @@ final class NavigationState extends Equatable {
       allFiles: allFiles ?? this.allFiles,
       currentPage: currentPage ?? this.currentPage,
       showSidePanel: showSidePanel ?? this.showSidePanel,
+      showTocPanel: showTocPanel ?? this.showTocPanel,
       errorMessage: errorMessage ?? this.errorMessage,
     );
   }
@@ -84,6 +88,7 @@ final class NavigationState extends Equatable {
     allFiles,
     currentPage,
     showSidePanel,
+    showTocPanel,
     errorMessage,
   ];
 }

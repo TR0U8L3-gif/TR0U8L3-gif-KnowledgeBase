@@ -17,6 +17,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     on<SelectDirectory>(_onSelectDirectory);
     on<NavigateToBreadcrumb>(_onNavigateToBreadcrumb);
     on<ToggleSidePanel>(_onToggleSidePanel);
+    on<ToggleTocPanel>(_onToggleTocPanel);
     on<ChangePage>(_onChangePage);
   }
 
@@ -123,6 +124,10 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     Emitter<NavigationState> emit,
   ) {
     emit(state.copyWith(showSidePanel: !state.showSidePanel));
+  }
+
+  void _onToggleTocPanel(ToggleTocPanel event, Emitter<NavigationState> emit) {
+    emit(state.copyWith(showTocPanel: !state.showTocPanel));
   }
 
   void _onChangePage(ChangePage event, Emitter<NavigationState> emit) {

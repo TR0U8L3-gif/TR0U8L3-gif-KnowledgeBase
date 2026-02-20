@@ -5,23 +5,25 @@ import '../../domain/entities/knowledge_base_item.dart';
 
 class HeaderWidget extends StatelessWidget {
   final VoidCallback onToggleSidePanel;
+  final VoidCallback onToggleTocPanel;
   final VoidCallback onTapGithub;
   final void Function(ThemeMode?) onSelectTheme;
   final void Function(String filePath) onSearchResultSelected;
-  final VoidCallback? onTocPressed;
   final List<FileItem> allFiles;
   final bool showSidePanel;
+  final bool showTocPanel;
   final ScreenSize screenSize;
 
   const HeaderWidget({
     super.key,
     required this.onToggleSidePanel,
+    required this.onToggleTocPanel,
     required this.onSelectTheme,
     required this.onTapGithub,
     required this.onSearchResultSelected,
     required this.allFiles,
     required this.showSidePanel,
-    this.onTocPressed,
+    required this.showTocPanel,
     this.screenSize = ScreenSize.desktop,
   });
 
@@ -66,17 +68,24 @@ class HeaderWidget extends StatelessWidget {
           ),
         ],
         trailing: [
-          // TOC button — only visible on mobile/tablet
-          if (onTocPressed != null)
-            Semantics(
-              button: true,
-              label: 'Open table of contents',
-              child: OutlineButton(
-                onPressed: onTocPressed,
-                density: ButtonDensity.icon,
-                child: const Icon(BootstrapIcons.listNested),
+          // TOC button — always visible
+          Semantics(
+            button: true,
+            label: showTocPanel
+                ? 'Close table of contents'
+                : 'Open table of contents',
+            child: OutlineButton(
+              onPressed: onToggleTocPanel,
+              density: ButtonDensity.icon,
+              child: Icon(
+                isMobile
+                    ? BootstrapIcons.listNested
+                    : showTocPanel
+                    ? BootstrapIcons.layoutSidebarInsetReverse
+                    : BootstrapIcons.layoutSidebarReverse,
               ),
             ),
+          ),
           Semantics(
             button: true,
             label: 'Search documentation',

@@ -30,6 +30,11 @@ final class ToggleSidePanel extends NavigationEvent {
   const ToggleSidePanel();
 }
 
+/// Toggles the right table-of-contents panel visibility.
+final class ToggleTocPanel extends NavigationEvent {
+  const ToggleTocPanel();
+}
+
 /// Changes the current pagination page.
 final class ChangePage extends NavigationEvent {
   final int page;
