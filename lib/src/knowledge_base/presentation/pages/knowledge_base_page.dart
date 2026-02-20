@@ -68,6 +68,7 @@ class _KnowledgeBaseViewState extends State<_KnowledgeBaseView> {
     openDrawer(
       context: context,
       position: OverlayPosition.left,
+      transformBackdrop: false,
       builder: (ctx) {
         return Semantics(
           label: 'Navigation drawer',
@@ -79,17 +80,7 @@ class _KnowledgeBaseViewState extends State<_KnowledgeBaseView> {
                   height: 48,
                   alignment: Alignment.centerLeft,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Navigation').semiBold(),
-                      OutlineButton(
-                        onPressed: () => Navigator.of(ctx).pop(),
-                        density: ButtonDensity.icon,
-                        child: const Icon(BootstrapIcons.x),
-                      ),
-                    ],
-                  ),
+                  child: const Text('Navigation').semiBold(),
                 ),
                 const Divider(),
                 Expanded(
@@ -98,11 +89,11 @@ class _KnowledgeBaseViewState extends State<_KnowledgeBaseView> {
                     width: 300,
                     selectedFilePath: navState.selectedFile?.path,
                     onFileSelected: (path) {
-                      Navigator.of(ctx).pop();
+                      closeDrawer(ctx);
                       context.read<NavigationBloc>().add(SelectFile(path));
                     },
                     onDirectorySelected: (path) {
-                      Navigator.of(ctx).pop();
+                      closeDrawer(ctx);
                       context.read<NavigationBloc>().add(SelectDirectory(path));
                     },
                   ),
@@ -123,6 +114,7 @@ class _KnowledgeBaseViewState extends State<_KnowledgeBaseView> {
     openDrawer(
       context: context,
       position: OverlayPosition.right,
+      transformBackdrop: false,
       builder: (ctx) {
         return Semantics(
           label: 'Table of contents drawer',
@@ -134,17 +126,7 @@ class _KnowledgeBaseViewState extends State<_KnowledgeBaseView> {
                   height: 48,
                   alignment: Alignment.centerLeft,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('On This Page').semiBold(),
-                      OutlineButton(
-                        onPressed: () => Navigator.of(ctx).pop(),
-                        density: ButtonDensity.icon,
-                        child: const Icon(BootstrapIcons.x),
-                      ),
-                    ],
-                  ),
+                  child: const Text('On This Page').semiBold(),
                 ),
                 const Divider(),
                 Expanded(
@@ -180,57 +162,59 @@ class _KnowledgeBaseViewState extends State<_KnowledgeBaseView> {
   Widget build(BuildContext context) {
     final screen = Responsive.screenSize(context);
 
-    return BlocBuilder<NavigationBloc, NavigationState>(
-      builder: (context, navState) {
-        return Scaffold(
-          headers: [
-            HeaderWidget(
-              onTapGithub: () {
-                launchUrl(
-                  Uri.parse('https://github.com/TR0U8L3-gif'),
-                  mode: LaunchMode.platformDefault,
-                  webOnlyWindowName: '_blank',
-                );
-              },
-              onSelectTheme: (theme) {
-                context.read<ThemeCubit>().setThemeMode(theme);
-              },
-              onToggleSidePanel: () {
-                // On mobile/tablet → open drawer, on desktop → toggle inline
-                if (screen != ScreenSize.desktop) {
-                  _openNavigationDrawer(context, navState);
-                } else {
-                  context.read<NavigationBloc>().add(const ToggleSidePanel());
-                }
-              },
-              onSearchResultSelected: (filePath) {
-                context.read<NavigationBloc>().add(SelectFile(filePath));
-              },
-              onTocPressed: screen != ScreenSize.desktop
-                  ? () => _openTocDrawer(context)
-                  : null,
-              allFiles: navState.allFiles,
-              showSidePanel: navState.showSidePanel,
-              screenSize: screen,
+    return DrawerOverlay(
+      child: BlocBuilder<NavigationBloc, NavigationState>(
+        builder: (context, navState) {
+          return Scaffold(
+            headers: [
+              HeaderWidget(
+                onTapGithub: () {
+                  launchUrl(
+                    Uri.parse('https://github.com/TR0U8L3-gif'),
+                    mode: LaunchMode.platformDefault,
+                    webOnlyWindowName: '_blank',
+                  );
+                },
+                onSelectTheme: (theme) {
+                  context.read<ThemeCubit>().setThemeMode(theme);
+                },
+                onToggleSidePanel: () {
+                  // On mobile/tablet → open drawer, on desktop → toggle inline
+                  if (screen != ScreenSize.mobile) {
+                    context.read<NavigationBloc>().add(const ToggleSidePanel());
+                  } else {
+                    _openNavigationDrawer(context, navState);
+                  }
+                },
+                onSearchResultSelected: (filePath) {
+                  context.read<NavigationBloc>().add(SelectFile(filePath));
+                },
+                onTocPressed: screen != ScreenSize.desktop
+                    ? () => _openTocDrawer(context)
+                    : null,
+                allFiles: navState.allFiles,
+                showSidePanel: navState.showSidePanel,
+                screenSize: screen,
+              ),
+              const Divider(),
+            ],
+            footers: [
+              const Divider(),
+              FooterWidget(
+                currentPage: navState.currentFileIndex,
+                totalPages: navState.totalFiles,
+                onPageChanged: (value) {
+                  context.read<NavigationBloc>().add(ChangePage(value));
+                },
+              ),
+            ],
+            child: Semantics(
+              label: 'Main content',
+              child: _buildContent(context, navState, screen),
             ),
-            const Divider(),
-          ],
-          footers: [
-            const Divider(),
-            FooterWidget(
-              currentPage: navState.currentFileIndex,
-              totalPages: navState.totalFiles,
-              onPageChanged: (value) {
-                context.read<NavigationBloc>().add(ChangePage(value));
-              },
-            ),
-          ],
-          child: Semantics(
-            label: 'Main content',
-            child: _buildContent(context, navState, screen),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
@@ -274,10 +258,8 @@ class _KnowledgeBaseViewState extends State<_KnowledgeBaseView> {
 
     // On mobile: no inline side panels at all — use drawers
     if (screen == ScreenSize.mobile) {
-      return Expanded(
-        child: CenterPanelWidget(
-          visibleHeadingsNotifier: _visibleHeadingsNotifier,
-        ),
+      return CenterPanelWidget(
+        visibleHeadingsNotifier: _visibleHeadingsNotifier,
       );
     }
 
