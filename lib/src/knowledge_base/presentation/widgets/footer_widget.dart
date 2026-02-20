@@ -1,3 +1,4 @@
+import 'package:knowledge_base/core/utils/responsive.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 class FooterWidget extends StatelessWidget {
@@ -14,15 +15,20 @@ class FooterWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppBar(
-      height: 36,
-      child: Center(
-        child: Pagination(
-          page: currentPage,
-          totalPages: totalPages,
-          maxPages: 3,
-          gap: 8,
-          onPageChanged: onPageChanged,
+    final isMobile = Responsive.isMobile(context);
+
+    return Semantics(
+      label: 'Page navigation, page $currentPage of $totalPages',
+      child: AppBar(
+        height: 36,
+        child: Center(
+          child: Pagination(
+            page: currentPage,
+            totalPages: totalPages,
+            maxPages: isMobile ? 1 : 3,
+            gap: isMobile ? 4 : 8,
+            onPageChanged: onPageChanged,
+          ),
         ),
       ),
     );

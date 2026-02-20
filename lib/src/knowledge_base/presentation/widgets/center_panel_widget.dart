@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:knowledge_base/core/utils/responsive.dart';
 import 'package:knowledge_base/src/knowledge_base/presentation/bloc/document/document_bloc.dart';
 import 'package:knowledge_base/src/knowledge_base/presentation/bloc/document/document_state.dart';
 import 'package:knowledge_base/src/knowledge_base/presentation/bloc/navigation/navigation_bloc.dart';
@@ -56,22 +57,32 @@ class CenterPanelWidget extends StatelessWidget {
               return BlocBuilder<DocumentBloc, DocumentState>(
                 builder: (context, docState) {
                   return switch (docState.status) {
-                    DocumentStatus.initial => const Center(
-                      child: Text('Select a document from the tree'),
+                    DocumentStatus.initial => Center(
+                      child: Semantics(
+                        label: 'No document selected',
+                        child: const Text('Select a document from the tree'),
+                      ),
                     ),
-                    DocumentStatus.loading => const Center(
-                      child: CircularProgressIndicator(),
+                    DocumentStatus.loading => Center(
+                      child: Semantics(
+                        label: 'Loading document',
+                        child: const CircularProgressIndicator(),
+                      ),
                     ),
                     DocumentStatus.error => Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(BootstrapIcons.exclamationTriangle),
-                          const Gap(8),
-                          Text(
-                            docState.errorMessage ?? 'Failed to load document',
-                          ).muted(),
-                        ],
+                      child: Semantics(
+                        label: 'Document load error',
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(BootstrapIcons.exclamationTriangle),
+                            const Gap(8),
+                            Text(
+                              docState.errorMessage ??
+                                  'Failed to load document',
+                            ).muted(),
+                          ],
+                        ),
                       ),
                     ),
                     DocumentStatus.loaded => _DocumentContent(
@@ -221,7 +232,7 @@ class _DocumentContentState extends State<_DocumentContent> {
         return SingleChildScrollView(
           key: _scrollViewKey,
           controller: _scrollController,
-          padding: const EdgeInsets.all(24),
+          padding: Responsive.contentPadding(context),
           child: MarkdownRendererWidget(
             markdown: content.rawMarkdown,
             title: file?.name,

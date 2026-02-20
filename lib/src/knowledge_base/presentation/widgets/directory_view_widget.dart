@@ -1,4 +1,5 @@
 import 'package:knowledge_base/core/utils/constants.dart';
+import 'package:knowledge_base/core/utils/responsive.dart';
 import 'package:knowledge_base/src/knowledge_base/domain/entities/knowledge_base_item.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
@@ -20,7 +21,7 @@ class DirectoryViewWidget extends StatelessWidget {
     final items = directory.sortedItems;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+      padding: Responsive.contentPadding(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -94,61 +95,67 @@ class _ItemCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return GestureDetector(
-      onTap: onTap,
-      child: OutlinedContainer(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Card header with icon and title
-            Row(
-              children: [
-                _buildIcon(theme),
-                const Gap(10),
-                Expanded(
-                  child: Text(
-                    item.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14 * theme.scaling,
+    return Semantics(
+      button: true,
+      label: item is FileItem
+          ? 'Open file ${item.name}'
+          : 'Open folder ${item.name}',
+      child: GestureDetector(
+        onTap: onTap,
+        child: OutlinedContainer(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Card header with icon and title
+              Row(
+                children: [
+                  _buildIcon(theme),
+                  const Gap(10),
+                  Expanded(
+                    child: Text(
+                      item.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14 * theme.scaling,
+                      ),
                     ),
                   ),
-                ),
-                Icon(
-                  BootstrapIcons.chevronRight,
-                  size: SizeIcons.small,
-                  color: theme.colorScheme.mutedForeground,
+                  Icon(
+                    BootstrapIcons.chevronRight,
+                    size: SizeIcons.small,
+                    color: theme.colorScheme.mutedForeground,
+                  ),
+                ],
+              ),
+
+              // Description
+              if (_description != null) ...[
+                const Gap(8),
+                Text(
+                  _description!,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 13 * theme.scaling,
+                    color: theme.colorScheme.mutedForeground,
+                  ),
                 ),
               ],
-            ),
 
-            // Description
-            if (_description != null) ...[
-              const Gap(8),
-              Text(
-                _description!,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 13 * theme.scaling,
-                  color: theme.colorScheme.mutedForeground,
-                ),
-              ),
+              // Meta info
+              if (item is FileItem) ...[
+                const Gap(12),
+                _buildFileMeta(context, item as FileItem),
+              ] else if (item is DirectoryItem) ...[
+                const Gap(12),
+                _buildDirectoryMeta(context, item as DirectoryItem),
+              ],
             ],
-
-            // Meta info
-            if (item is FileItem) ...[
-              const Gap(12),
-              _buildFileMeta(context, item as FileItem),
-            ] else if (item is DirectoryItem) ...[
-              const Gap(12),
-              _buildDirectoryMeta(context, item as DirectoryItem),
-            ],
-          ],
-        ).withPadding(padding: const EdgeInsets.all(16)),
+          ).withPadding(padding: const EdgeInsets.all(16)),
+        ),
       ),
     );
   }

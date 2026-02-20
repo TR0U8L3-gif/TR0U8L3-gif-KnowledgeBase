@@ -167,22 +167,30 @@ class _DirectoriesTreeWidgetState extends State<DirectoriesTreeWidget> {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    OutlineButton(
-                      onPressed: _expandAll,
-                      density: ButtonDensity.icon,
-                      child: const Icon(
-                        BootstrapIcons.arrowsExpand,
-                        size: 14,
-                      ).muted(),
+                    Semantics(
+                      button: true,
+                      label: 'Expand all folders',
+                      child: OutlineButton(
+                        onPressed: _expandAll,
+                        density: ButtonDensity.icon,
+                        child: const Icon(
+                          BootstrapIcons.arrowsExpand,
+                          size: 14,
+                        ).muted(),
+                      ),
                     ),
                     const Gap(4),
-                    OutlineButton(
-                      onPressed: _collapseAll,
-                      density: ButtonDensity.icon,
-                      child: const Icon(
-                        BootstrapIcons.arrowsCollapse,
-                        size: 14,
-                      ).muted(),
+                    Semantics(
+                      button: true,
+                      label: 'Collapse all folders',
+                      child: OutlineButton(
+                        onPressed: _collapseAll,
+                        density: ButtonDensity.icon,
+                        child: const Icon(
+                          BootstrapIcons.arrowsCollapse,
+                          size: 14,
+                        ).muted(),
+                      ),
                     ),
                   ],
                 ),
@@ -195,35 +203,43 @@ class _DirectoriesTreeWidgetState extends State<DirectoriesTreeWidget> {
               nodes: treeItems,
               onSelectionChanged: _handleSelectionChanged,
               builder: (context, node) {
-                return TreeItemView(
-                  leading: node.data.isFile
-                      ? const Icon(BootstrapIcons.fileText, size: 16)
-                      : Icon(
-                          node.expanded
-                              ? BootstrapIcons.folder2Open
-                              : BootstrapIcons.folder2,
-                          size: 16,
+                return Semantics(
+                  label: node.data.isFile
+                      ? 'File: ${node.data.title}'
+                      : 'Folder: ${node.data.title}${node.expanded ? ', expanded' : ', collapsed'}',
+                  child: TreeItemView(
+                    leading: ExcludeSemantics(
+                      child: node.data.isFile
+                          ? const Icon(BootstrapIcons.fileText, size: 16)
+                          : Icon(
+                              node.expanded
+                                  ? BootstrapIcons.folder2Open
+                                  : BootstrapIcons.folder2,
+                              size: 16,
+                            ),
+                    ),
+                    onExpand: TreeView.defaultItemExpandHandler<DirTreeItem>(
+                      treeItems,
+                      node,
+                      (value) {
+                        setState(() {
+                          treeItems = value;
+                        });
+                      },
+                    ),
+                    child: Tooltip(
+                      waitDuration: AppDuration.extraLarge,
+                      tooltip: TooltipContainer(
+                        child: Text(node.data.title),
+                      ).call,
+                      child: GestureDetector(
+                        onTap: () =>
+                            _handleSelectionChanged([node], false, true),
+                        child: Text(
+                          node.data.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                  onExpand: TreeView.defaultItemExpandHandler<DirTreeItem>(
-                    treeItems,
-                    node,
-                    (value) {
-                      setState(() {
-                        treeItems = value;
-                      });
-                    },
-                  ),
-                  child: Tooltip(
-                    waitDuration: AppDuration.extraLarge,
-                    tooltip: TooltipContainer(
-                      child: Text(node.data.title),
-                    ).call,
-                    child: GestureDetector(
-                      onTap: () => _handleSelectionChanged([node], false, true),
-                      child: Text(
-                        node.data.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ),

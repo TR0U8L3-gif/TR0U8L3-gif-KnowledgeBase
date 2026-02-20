@@ -84,17 +84,28 @@ class MarkdownRendererWidget extends StatelessWidget {
       blockWidgets.add(const Gap(16));
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (title != null) ...[Text(title!).h1(), const Gap(8)],
-        if (lastModified != null) ...[
-          Text('Last updated: ${_formatDate(lastModified!)}').muted().small(),
-          const Gap(8),
+    return Semantics(
+      label: 'Document content${title != null ? ': $title' : ''}',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (title != null) ...[Text(title!).h1(), const Gap(8)],
+          if (lastModified != null) ...[
+            Semantics(
+              label: 'Last updated ${_formatDate(lastModified!)}',
+              child: Text(
+                'Last updated: ${_formatDate(lastModified!)}',
+              ).muted().small(),
+            ),
+            const Gap(8),
+          ],
+          if (description != null) ...[
+            Text(description!).lead(),
+            const Gap(24),
+          ],
+          ...blockWidgets,
         ],
-        if (description != null) ...[Text(description!).lead(), const Gap(24)],
-        ...blockWidgets,
-      ],
+      ),
     );
   }
 

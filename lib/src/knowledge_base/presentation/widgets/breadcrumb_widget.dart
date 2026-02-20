@@ -20,18 +20,24 @@ class BreadcrumbWidget extends StatelessWidget {
     }
 
     if (items.length == 1) {
-      return _Container(height: height, child: _EllipsisText(items.first));
+      return Semantics(
+        label: 'Breadcrumb navigation: ${items.first}',
+        child: _Container(height: height, child: _EllipsisText(items.first)),
+      );
     }
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return _BreadcrumbContent(
-          items: items,
-          onItemTapped: onItemTapped,
-          height: height,
-          maxWidth: constraints.maxWidth,
-        );
-      },
+    return Semantics(
+      label: 'Breadcrumb navigation: ${items.join(' > ')}',
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return _BreadcrumbContent(
+            items: items,
+            onItemTapped: onItemTapped,
+            height: height,
+            maxWidth: constraints.maxWidth,
+          );
+        },
+      ),
     );
   }
 }

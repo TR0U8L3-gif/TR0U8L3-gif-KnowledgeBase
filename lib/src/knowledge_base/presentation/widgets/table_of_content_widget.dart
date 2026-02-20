@@ -255,31 +255,35 @@ class _TocItem extends StatelessWidget {
     final theme = Theme.of(context);
     final indent = item.heading.level - 1;
     final indentScale = (indent * 0.25);
-    return TextButton(
-      onPressed: () {},
-      density: ButtonDensity.compact,
-      child: Tooltip(
-        waitDuration: AppDuration.extraLarge,
-        tooltip: TooltipContainer(child: Text(item.title)).call,
-        child:
-            Text(
-                  item.title,
-                  style: TextStyle(
-                    fontSize: 14 - indentScale,
-                    fontWeight: FontWeight.normal,
-                    color: theme.colorScheme.foreground,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                )
-                .withPadding(
-                  padding: EdgeInsets.only(
-                    left: indent * SizePadding.base - indentScale,
-                    top: SizePadding.small,
-                    bottom: SizePadding.small,
-                  ),
-                )
-                .withOpacity(isActive ? 1.0 : 0.64),
+    return Semantics(
+      label:
+          'Heading level ${item.heading.level}: ${item.title}${isActive ? ', currently visible' : ''}',
+      child: TextButton(
+        onPressed: () {},
+        density: ButtonDensity.compact,
+        child: Tooltip(
+          waitDuration: AppDuration.extraLarge,
+          tooltip: TooltipContainer(child: Text(item.title)).call,
+          child:
+              Text(
+                    item.title,
+                    style: TextStyle(
+                      fontSize: 14 - indentScale,
+                      fontWeight: FontWeight.normal,
+                      color: theme.colorScheme.foreground,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  )
+                  .withPadding(
+                    padding: EdgeInsets.only(
+                      left: indent * SizePadding.base - indentScale,
+                      top: SizePadding.small,
+                      bottom: SizePadding.small,
+                    ),
+                  )
+                  .withOpacity(isActive ? 1.0 : 0.64),
+        ),
       ),
     );
   }
