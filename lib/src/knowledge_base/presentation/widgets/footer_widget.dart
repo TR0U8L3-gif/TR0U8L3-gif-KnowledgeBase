@@ -21,8 +21,8 @@ class FooterWidget extends StatelessWidget {
     return Semantics(
       label: 'Page navigation, page $currentPage of $totalPages',
       child: AppBar(
-        height: 36,
-        padding: isMobileOrSmaller ? const EdgeInsets.symmetric(vertical: 8, horizontal: 0) : null,
+        height: 40,
+        padding: isMobileOrSmaller ? const EdgeInsets.symmetric(vertical: 8) : null,
         child: Center(
           child: Pagination(
             page: currentPage,

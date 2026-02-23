@@ -31,11 +31,12 @@ class HeaderWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isMobileOrSmaller = Responsive.isMobileOrSmaller(context);
+    final iconSize = isMobileOrSmaller ? SizeIcons.medium : SizeIcons.large;
 
     return Semantics(
       label: 'Application header',
       child: AppBar(
-        height: isMobileOrSmaller ? 36 : null,
+        padding: isMobileOrSmaller ? const EdgeInsets.all(8) : null,
         title: const Text(
           'Knowledge Base',
           maxLines: 1,
@@ -63,7 +64,7 @@ class HeaderWidget extends StatelessWidget {
                     : showSidePanel
                     ? BootstrapIcons.layoutSidebarInset
                     : BootstrapIcons.layoutSidebar,
-                size: isMobileOrSmaller ? SizeIcons.base : SizeIcons.large,
+                size: iconSize
               ),
             ),
           ),
@@ -84,7 +85,7 @@ class HeaderWidget extends StatelessWidget {
                     : showTocPanel
                     ? BootstrapIcons.layoutSidebarInsetReverse
                     : BootstrapIcons.layoutSidebarReverse,
-                size: isMobileOrSmaller ? SizeIcons.base : SizeIcons.large,
+                size: iconSize
               ),
             ),
           ),
@@ -98,7 +99,7 @@ class HeaderWidget extends StatelessWidget {
               density: ButtonDensity.icon,
               child: Icon(
                 BootstrapIcons.search,
-                size: isMobileOrSmaller ? SizeIcons.base : SizeIcons.large,
+                size: iconSize
               ),
             ),
           ),
@@ -112,7 +113,7 @@ class HeaderWidget extends StatelessWidget {
               density: ButtonDensity.icon,
               child: Icon(
                 BootstrapIcons.sunFill,
-                size: isMobileOrSmaller ? SizeIcons.base : SizeIcons.large,
+                size: iconSize
               ),
             ),
           ),
@@ -125,7 +126,7 @@ class HeaderWidget extends StatelessWidget {
                 density: ButtonDensity.icon,
                 child: Icon(
                   BootstrapIcons.github,
-                  size: isMobileOrSmaller ? SizeIcons.base : SizeIcons.large,
+                  size: iconSize
                 ),
               ),
             ),

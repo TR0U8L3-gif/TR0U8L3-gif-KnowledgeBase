@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:knowledge_base/src/knowledge_base/data/data_sources/knowledge_base_local_data_source.dart';
 import 'package:knowledge_base/src/knowledge_base/data/repositories/knowledge_base_repository_impl.dart';
+import 'package:knowledge_base/src/knowledge_base/domain/entities/knowledge_base_item.dart';
 
 // ── Fake data source ────────────────────────────────────────────────────────
 
@@ -15,6 +16,19 @@ class _FakeDataSource extends KnowledgeBaseLocalDataSource {
 
 KnowledgeBaseRepositoryImpl _repoWith(String markdown) =>
     KnowledgeBaseRepositoryImpl(dataSource: _FakeDataSource(markdown));
+
+/// Fake data source with both loadMarkdownFile and loadIndexJson overridden.
+class _FakeIndexDataSource extends KnowledgeBaseLocalDataSource {
+  _FakeIndexDataSource(this._json);
+
+  final Map<String, dynamic> _json;
+
+  @override
+  Future<Map<String, dynamic>> loadIndexJson() async => _json;
+
+  @override
+  Future<String> loadMarkdownFile(String path) async => '';
+}
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -240,6 +254,257 @@ description: A guide
     test('inline code containing # does not create a heading', () async {
       const md = 'Use `# not a heading` in your config.\n## Real';
       expect(await headingTitles(md), ['Real']);
+    });
+  });
+
+  // ── loadIndex ────────────────────────────────────────────────────────────
+
+  group('KnowledgeBaseRepositoryImpl.loadIndex', () {
+    test('parses a flat directory from JSON index', () async {
+      final repo = KnowledgeBaseRepositoryImpl(
+        dataSource: _FakeIndexDataSource({
+          'directory': {
+            'type': 'directory',
+            'name': 'Root',
+            'path': '',
+            'items': [
+              {
+                'type': 'file',
+                'name': 'Auth',
+                'path': 'api/auth.md',
+                'tags': <String>[],
+                'extension': 'md',
+              },
+            ],
+          },
+        }),
+      );
+      final root = await repo.loadIndex();
+      expect(root.name, 'Root');
+      expect(root.items.length, 1);
+      expect(root.items.first.name, 'Auth');
+    });
+
+    test('parses nested directory structure from JSON index', () async {
+      final repo = KnowledgeBaseRepositoryImpl(
+        dataSource: _FakeIndexDataSource({
+          'directory': {
+            'type': 'directory',
+            'name': 'Root',
+            'path': '',
+            'items': [
+              {
+                'type': 'directory',
+                'name': 'API',
+                'path': 'api',
+                'items': [
+                  {
+                    'type': 'file',
+                    'name': 'Auth',
+                    'path': 'api/auth.md',
+                    'tags': <String>[],
+                    'extension': 'md',
+                  },
+                ],
+              },
+            ],
+          },
+        }),
+      );
+      final root = await repo.loadIndex();
+      expect(root.name, 'Root');
+      expect(root.items.length, 1);
+      final apiDir = root.items.first as DirectoryItem;
+      expect(apiDir.name, 'API');
+      expect(apiDir.items.length, 1);
+    });
+
+    test('returns empty directory when items list is absent', () async {
+      final repo = KnowledgeBaseRepositoryImpl(
+        dataSource: _FakeIndexDataSource({
+          'directory': {'type': 'directory', 'name': 'Root', 'path': ''},
+        }),
+      );
+      final root = await repo.loadIndex();
+      expect(root.items, isEmpty);
+    });
+  });
+
+  // ── getAllFiles ──────────────────────────────────────────────────────────
+
+  group('KnowledgeBaseRepositoryImpl.getAllFiles', () {
+    final repo = KnowledgeBaseRepositoryImpl(dataSource: _FakeDataSource(''));
+
+    const file1 = FileItem(
+      name: 'Auth',
+      path: 'api/auth.md',
+      tags: [],
+      extension: 'md',
+    );
+    const file2 = FileItem(
+      name: 'Payments',
+      path: 'api/payments.md',
+      tags: [],
+      extension: 'md',
+    );
+    const file3 = FileItem(
+      name: 'Local Dev',
+      path: 'guides/local-dev.md',
+      tags: [],
+      extension: 'md',
+    );
+
+    test('returns all files from a flat directory', () {
+      const root = DirectoryItem(name: 'Root', path: '', items: [file1, file2]);
+      final files = repo.getAllFiles(root);
+      expect(files.map((f) => f.name).toList(), ['Auth', 'Payments']);
+    });
+
+    test('returns files from nested directories (DFS order)', () {
+      const apiDir = DirectoryItem(
+        name: 'API',
+        path: 'api',
+        items: [file1, file2],
+      );
+      const guidesDir = DirectoryItem(
+        name: 'Guides',
+        path: 'guides',
+        items: [file3],
+      );
+      const root = DirectoryItem(
+        name: 'Root',
+        path: '',
+        items: [apiDir, guidesDir],
+      );
+      final files = repo.getAllFiles(root);
+      expect(files.map((f) => f.name).toList(), [
+        'Auth',
+        'Payments',
+        'Local Dev',
+      ]);
+    });
+
+    test('returns empty list for empty root directory', () {
+      const root = DirectoryItem(name: 'Root', path: '', items: []);
+      expect(repo.getAllFiles(root), isEmpty);
+    });
+
+    test('respects sortedItems order for directories with order list', () {
+      const fileA = FileItem(
+        name: 'A',
+        path: 'dir/a.md',
+        tags: [],
+        extension: 'md',
+      );
+      const fileB = FileItem(
+        name: 'B',
+        path: 'dir/b.md',
+        tags: [],
+        extension: 'md',
+      );
+      const dir = DirectoryItem(
+        name: 'Dir',
+        path: 'dir',
+        items: [fileB, fileA],
+        order: ['a.md', 'b.md'],
+      );
+      const root = DirectoryItem(name: 'Root', path: '', items: [dir]);
+      final files = repo.getAllFiles(root);
+      expect(files.map((f) => f.name).toList(), ['A', 'B']);
+    });
+  });
+
+  // ── computeBreadcrumb ────────────────────────────────────────────────────
+
+  group('KnowledgeBaseRepositoryImpl.computeBreadcrumb', () {
+    final repo = KnowledgeBaseRepositoryImpl(dataSource: _FakeDataSource(''));
+
+    const file1 = FileItem(
+      name: 'Auth',
+      path: 'api/auth.md',
+      tags: [],
+      extension: 'md',
+    );
+    const apiDir = DirectoryItem(name: 'API', path: 'api', items: [file1]);
+    const root = DirectoryItem(name: 'Root', path: '', items: [apiDir]);
+
+    test('returns breadcrumb to a file', () {
+      final bc = repo.computeBreadcrumb(root, 'api/auth.md');
+      expect(bc.length, 3);
+      expect(bc[0].label, 'Root');
+      expect(bc[0].isFile, isFalse);
+      expect(bc[1].label, 'API');
+      expect(bc[1].isFile, isFalse);
+      expect(bc[2].label, 'Auth');
+      expect(bc[2].isFile, isTrue);
+    });
+
+    test('returns breadcrumb to a directory', () {
+      final bc = repo.computeBreadcrumb(root, 'api');
+      expect(bc.length, 2);
+      expect(bc[0].label, 'Root');
+      expect(bc[1].label, 'API');
+      expect(bc[1].isFile, isFalse);
+    });
+
+    test('returns empty list when path is not found', () {
+      final bc = repo.computeBreadcrumb(root, 'nonexistent/path.md');
+      expect(bc, isEmpty);
+    });
+
+    test('returns single entry when target is the root directory', () {
+      final bc = repo.computeBreadcrumb(root, '');
+      expect(bc.length, 1);
+      expect(bc.first.label, 'Root');
+      expect(bc.first.path, '');
+      expect(bc.first.isFile, isFalse);
+    });
+
+    test('breadcrumb paths are correct', () {
+      final bc = repo.computeBreadcrumb(root, 'api/auth.md');
+      expect(bc.map((e) => e.path).toList(), ['', 'api', 'api/auth.md']);
+    });
+  });
+
+  // ── _stripFrontmatter ────────────────────────────────────────────────────
+
+  group('KnowledgeBaseRepositoryImpl._stripFrontmatter', () {
+    Future<String> stripResult(String md) async {
+      final doc = await _repoWith(md).loadDocument('test.md');
+      return doc.rawMarkdown;
+    }
+
+    test('strips frontmatter block', () async {
+      const md = '---\ntitle: Doc\n---\n# Heading\nContent.';
+      final result = await stripResult(md);
+      expect(result, startsWith('# Heading'));
+    });
+
+    test('returns markdown unchanged when no frontmatter', () async {
+      const md = '# Heading\nContent.';
+      final result = await stripResult(md);
+      expect(result, md);
+    });
+
+    test('returns markdown unchanged when first line is not ---', () async {
+      const md = 'Just content.\n---\nStill content.\n---';
+      final result = await stripResult(md);
+      expect(result, md);
+    });
+
+    test(
+      'returns markdown unchanged when frontmatter is never closed',
+      () async {
+        const md = '---\ntitle: Doc\n# Not stripped';
+        final result = await stripResult(md);
+        expect(result, md);
+      },
+    );
+
+    test('trims leading whitespace after frontmatter', () async {
+      const md = '---\ntitle: Doc\n---\n\n\n# Heading';
+      final result = await stripResult(md);
+      expect(result.trimLeft(), startsWith('# Heading'));
     });
   });
 }

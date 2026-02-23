@@ -131,6 +131,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   }
 
   void _onChangePage(ChangePage event, Emitter<NavigationState> emit) {
+    if (state.totalFiles == 0) return;
     final page = event.page.clamp(1, state.totalFiles);
     if (page > 0 && page <= state.allFiles.length) {
       final file = state.allFiles[page - 1];
