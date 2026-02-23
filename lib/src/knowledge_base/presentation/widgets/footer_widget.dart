@@ -15,19 +15,23 @@ class FooterWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isMobile = Responsive.isMobile(context);
+    final isMobileOrSmaller = Responsive.isMobileOrSmaller(context);
+    final isPhone = Responsive.isPhone(context);
 
     return Semantics(
       label: 'Page navigation, page $currentPage of $totalPages',
       child: AppBar(
         height: 36,
+        padding: isMobileOrSmaller ? const EdgeInsets.symmetric(vertical: 8, horizontal: 0) : null,
         child: Center(
           child: Pagination(
             page: currentPage,
             totalPages: totalPages,
-            maxPages: isMobile ? 1 : 3,
-            gap: isMobile ? 4 : 8,
+            maxPages: isMobileOrSmaller ? 1 : 3,
+            gap: isMobileOrSmaller ? 4 : 8,
             onPageChanged: onPageChanged,
+            showSkipToFirstPage: !isPhone,
+            showSkipToLastPage: !isPhone,
           ),
         ),
       ),

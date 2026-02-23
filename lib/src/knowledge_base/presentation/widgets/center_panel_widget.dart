@@ -13,9 +13,17 @@ import 'package:shadcn_flutter/shadcn_flutter.dart';
 /// Center panel displaying breadcrumb navigation and rendered document content
 /// or directory view depending on the current [ViewMode].
 class CenterPanelWidget extends StatelessWidget {
-  const CenterPanelWidget({this.visibleHeadingsNotifier, super.key});
+  const CenterPanelWidget({
+    this.visibleHeadingsNotifier,
+    this.headingKeysNotifier,
+    super.key,
+  });
 
   final ValueNotifier<Set<int>>? visibleHeadingsNotifier;
+
+  /// Notifier populated with the [GlobalKey] list for each rendered heading.
+  /// Consumers (e.g. the TOC panel) can read these keys to scroll to a heading.
+  final ValueNotifier<List<GlobalKey>>? headingKeysNotifier;
 
   @override
   Widget build(BuildContext context) {
@@ -88,6 +96,7 @@ class CenterPanelWidget extends StatelessWidget {
                     DocumentStatus.loaded => _DocumentContent(
                       docState: docState,
                       visibleHeadingsNotifier: visibleHeadingsNotifier,
+                      headingKeysNotifier: headingKeysNotifier,
                     ),
                   };
                 },
@@ -103,10 +112,12 @@ class CenterPanelWidget extends StatelessWidget {
 class _DocumentContent extends StatefulWidget {
   final DocumentState docState;
   final ValueNotifier<Set<int>>? visibleHeadingsNotifier;
+  final ValueNotifier<List<GlobalKey>>? headingKeysNotifier;
 
   const _DocumentContent({
     required this.docState,
     this.visibleHeadingsNotifier,
+    this.headingKeysNotifier,
   });
 
   @override
@@ -141,7 +152,8 @@ class _DocumentContentState extends State<_DocumentContent> {
 
   void _initHeadingKeys() {
     final headingCount = widget.docState.content?.headings.length ?? 0;
-    _headingKeys = List.generate(headingCount, (_) => GlobalKey());
+    _headingKeys = List<GlobalKey>.generate(headingCount, (_) => GlobalKey());
+    widget.headingKeysNotifier?.value = _headingKeys;
   }
 
   void _updateVisibleHeadings() {

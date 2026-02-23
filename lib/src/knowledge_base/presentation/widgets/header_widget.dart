@@ -1,3 +1,4 @@
+import 'package:knowledge_base/core/utils/constants.dart';
 import 'package:knowledge_base/core/utils/responsive.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
@@ -29,19 +30,18 @@ class HeaderWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const menuGap = MenuGap(4);
-    final isMobile = screenSize == ScreenSize.mobile;
-    final isTablet = screenSize == ScreenSize.tablet;
+    final isMobileOrSmaller = Responsive.isMobileOrSmaller(context);
 
     return Semantics(
       label: 'Application header',
       child: AppBar(
+        height: isMobileOrSmaller ? 36 : null,
         title: const Text(
           'Knowledge Base',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        subtitle: (isMobile || isTablet)
+        subtitle: isMobileOrSmaller
             ? null
             : const Text(
                 'Explore my comprehensive documentation',
@@ -58,11 +58,12 @@ class HeaderWidget extends StatelessWidget {
               onPressed: onToggleSidePanel,
               density: ButtonDensity.icon,
               child: Icon(
-                isMobile
+                isMobileOrSmaller
                     ? BootstrapIcons.list
                     : showSidePanel
                     ? BootstrapIcons.layoutSidebarInset
                     : BootstrapIcons.layoutSidebar,
+                size: isMobileOrSmaller ? SizeIcons.base : SizeIcons.large,
               ),
             ),
           ),
@@ -78,11 +79,12 @@ class HeaderWidget extends StatelessWidget {
               onPressed: onToggleTocPanel,
               density: ButtonDensity.icon,
               child: Icon(
-                isMobile
+                isMobileOrSmaller
                     ? BootstrapIcons.listNested
                     : showTocPanel
                     ? BootstrapIcons.layoutSidebarInsetReverse
                     : BootstrapIcons.layoutSidebarReverse,
+                size: isMobileOrSmaller ? SizeIcons.base : SizeIcons.large,
               ),
             ),
           ),
@@ -94,70 +96,37 @@ class HeaderWidget extends StatelessWidget {
                 _showSearchPopover(context);
               },
               density: ButtonDensity.icon,
-              child: const Icon(BootstrapIcons.search),
+              child: Icon(
+                BootstrapIcons.search,
+                size: isMobileOrSmaller ? SizeIcons.base : SizeIcons.large,
+              ),
             ),
           ),
           Semantics(
             button: true,
             label: 'Change color theme',
             child: OutlineButton(
-              onPressed: () async {
-                await showDropdown<ThemeMode?>(
-                  context: context,
-                  alignment: Alignment.topRight,
-                  offset: const Offset(52, 8),
-                  consumeOutsideTaps: true,
-                  builder: (ctx) {
-                    return DropdownMenu(
-                      surfaceBlur: 10,
-                      surfaceOpacity: 0.6,
-                      children: [
-                        MenuLabel(child: Text('Select Theme')),
-                        MenuDivider(),
-                        menuGap,
-                        MenuButton(
-                          leading: Icon(LucideIcons.sunMoon),
-                          child: Text('System'),
-                          onPressed: (context) {
-                            closeOverlay(context, ThemeMode.system);
-                          },
-                        ),
-                        menuGap,
-                        MenuButton(
-                          leading: Icon(LucideIcons.sun),
-                          child: Text('Light'),
-                          onPressed: (context) {
-                            closeOverlay(context, ThemeMode.light);
-                          },
-                        ),
-                        menuGap,
-                        MenuButton(
-                          leading: Icon(LucideIcons.moon),
-                          child: Text('Dark'),
-                          onPressed: (context) {
-                            closeOverlay(context, ThemeMode.dark);
-                          },
-                        ),
-                        menuGap,
-                      ],
-                    );
-                  },
-                ).then((completer) {
-                  completer.future.then(onSelectTheme);
-                });
+              onPressed: () {
+                _showThemeDropdown(context);
               },
               density: ButtonDensity.icon,
-              child: const Icon(BootstrapIcons.sunFill),
+              child: Icon(
+                BootstrapIcons.sunFill,
+                size: isMobileOrSmaller ? SizeIcons.base : SizeIcons.large,
+              ),
             ),
           ),
-          if (!isMobile)
+          if (!isMobileOrSmaller)
             Semantics(
               button: true,
               label: 'Open GitHub profile',
               child: OutlineButton(
                 onPressed: onTapGithub,
                 density: ButtonDensity.icon,
-                child: const Icon(BootstrapIcons.github),
+                child: Icon(
+                  BootstrapIcons.github,
+                  size: isMobileOrSmaller ? SizeIcons.base : SizeIcons.large,
+                ),
               ),
             ),
         ],
@@ -167,16 +136,16 @@ class HeaderWidget extends StatelessWidget {
 
   void _showSearchPopover(BuildContext context) {
     final theme = Theme.of(context);
-    final isMobile = screenSize == ScreenSize.mobile;
+    final isMobileOrSmaller = Responsive.isMobileOrSmaller(context);
 
     showPopover(
       context: context,
       alignment: Alignment.topRight,
-      offset: isMobile ? const Offset(16, 12) : const Offset(96, 12),
+      offset: isMobileOrSmaller ? const Offset(16, 12) : const Offset(96, 12),
       overlayBarrier: OverlayBarrier(borderRadius: theme.borderRadiusLg),
       builder: (ctx) => _SearchPopoverContent(
         allFiles: allFiles,
-        isMobile: isMobile,
+        isMobileOrSmaller: isMobileOrSmaller,
         onFileSelected: (filePath) {
           closeOverlay(ctx);
           onSearchResultSelected(filePath);
@@ -184,17 +153,66 @@ class HeaderWidget extends StatelessWidget {
       ),
     );
   }
+
+  void _showThemeDropdown(BuildContext context) {
+    const menuGap = MenuGap(4);
+    final isMobileOrSmaller = Responsive.isMobileOrSmaller(context);
+    showDropdown(
+      context: context,
+      alignment: Alignment.topRight,
+      offset: isMobileOrSmaller ? const Offset(8, 12) : const Offset(52, 12),
+      consumeOutsideTaps: true,
+      builder: (ctx) {
+        return DropdownMenu(
+          surfaceBlur: 10,
+          surfaceOpacity: 0.6,
+          children: [
+            MenuLabel(child: Text('Select Theme')),
+            MenuDivider(),
+            menuGap,
+            MenuButton(
+              leading: Icon(LucideIcons.sunMoon),
+              child: Text('System'),
+              onPressed: (context) {
+                onSelectTheme(ThemeMode.system);
+                closeOverlay(context);
+              },
+            ),
+            menuGap,
+            MenuButton(
+              leading: Icon(LucideIcons.sun),
+              child: Text('Light'),
+              onPressed: (context) {
+                onSelectTheme(ThemeMode.light);
+                closeOverlay(context);
+              },
+            ),
+            menuGap,
+            MenuButton(
+              leading: Icon(LucideIcons.moon),
+              child: Text('Dark'),
+              onPressed: (context) {
+                onSelectTheme(ThemeMode.dark);
+                closeOverlay(context);
+              },
+            ),
+            menuGap,
+          ],
+        );
+      },
+    );
+  }
 }
 
 class _SearchPopoverContent extends StatefulWidget {
   final List<FileItem> allFiles;
   final void Function(String filePath) onFileSelected;
-  final bool isMobile;
+  final bool isMobileOrSmaller;
 
   const _SearchPopoverContent({
     required this.allFiles,
     required this.onFileSelected,
-    this.isMobile = false,
+    this.isMobileOrSmaller = false,
   });
 
   @override
@@ -246,8 +264,12 @@ class _SearchPopoverContentState extends State<_SearchPopoverContent> {
         padding: EdgeInsets.zero,
         child: ConstrainedBox(
           constraints: BoxConstraints(
-            maxWidth: widget.isMobile ? 320 : 560,
-            maxHeight: widget.isMobile ? 360 : 420,
+            maxWidth: widget.isMobileOrSmaller
+                ? MediaQuery.sizeOf(context).width - 48
+                : 560,
+            maxHeight: widget.isMobileOrSmaller
+                ? MediaQuery.sizeOf(context).height * 0.60
+                : 420,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,

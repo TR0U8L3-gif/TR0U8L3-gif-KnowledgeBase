@@ -112,17 +112,32 @@ class KnowledgeBaseRepositoryImpl implements KnowledgeBaseRepository {
   }
 
   /// Extracts headings from markdown for building a Table of Contents.
+  ///
+  /// Lines inside fenced code blocks (``` ... ```) are skipped so that
+  /// shell/bash comment lines such as `# bootstrap` are not mistaken for
+  /// markdown headings.
   List<DocumentHeading> _extractHeadings(String markdown) {
     final headings = <DocumentHeading>[];
-    final headingRegex = RegExp(r'^(#{1,6})\s+(.+)$', multiLine: true);
+    final headingRegex = RegExp(r'^(#{1,6})\s+(.+)$');
 
-    for (final match in headingRegex.allMatches(markdown)) {
-      headings.add(
-        DocumentHeading(
-          level: match.group(1)!.length,
-          title: match.group(2)!.trim(),
-        ),
-      );
+    bool inCodeBlock = false;
+    for (final line in markdown.split('\n')) {
+      final trimmed = line.trimLeft();
+      if (trimmed.startsWith('```')) {
+        inCodeBlock = !inCodeBlock;
+        continue;
+      }
+      if (inCodeBlock) continue;
+
+      final match = headingRegex.firstMatch(trimmed);
+      if (match != null) {
+        headings.add(
+          DocumentHeading(
+            level: match.group(1)!.length,
+            title: match.group(2)!.trim(),
+          ),
+        );
+      }
     }
 
     return headings;

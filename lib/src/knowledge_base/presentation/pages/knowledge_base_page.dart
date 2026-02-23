@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:knowledge_base/core/utils/constants.dart';
 import 'package:knowledge_base/core/utils/responsive.dart';
 import 'package:knowledge_base/src/knowledge_base/presentation/bloc/document/document_bloc.dart';
 import 'package:knowledge_base/src/knowledge_base/presentation/bloc/document/document_event.dart';
@@ -48,10 +49,12 @@ class _KnowledgeBaseView extends StatefulWidget {
 
 class _KnowledgeBaseViewState extends State<_KnowledgeBaseView> {
   final ValueNotifier<Set<int>> _visibleHeadingsNotifier = ValueNotifier({});
+  final ValueNotifier<List<GlobalKey>> _headingKeysNotifier = ValueNotifier([]);
 
   @override
   void dispose() {
     _visibleHeadingsNotifier.dispose();
+    _headingKeysNotifier.dispose();
     super.dispose();
   }
 
@@ -69,6 +72,7 @@ class _KnowledgeBaseViewState extends State<_KnowledgeBaseView> {
       context: context,
       position: OverlayPosition.left,
       transformBackdrop: false,
+      showDragHandle: false,
       builder: (ctx) {
         return Semantics(
           label: 'Navigation drawer',
@@ -115,6 +119,7 @@ class _KnowledgeBaseViewState extends State<_KnowledgeBaseView> {
       context: context,
       position: OverlayPosition.right,
       transformBackdrop: false,
+      showDragHandle: false,
       builder: (ctx) {
         return Semantics(
           label: 'Table of contents drawer',
@@ -134,8 +139,8 @@ class _KnowledgeBaseViewState extends State<_KnowledgeBaseView> {
                     valueListenable: _visibleHeadingsNotifier,
                     builder: (_, visibleIndices, __) {
                       return TableOfContentWidget(
-                        width: 300,
                         activeItemIndices: visibleIndices,
+                        onItemTapped: _onItemTapped,
                         items: headings
                             .map(
                               (h) => TOCItem(
@@ -154,6 +159,23 @@ class _KnowledgeBaseViewState extends State<_KnowledgeBaseView> {
         );
       },
     );
+  }
+
+  void _onItemTapped(int index, TOCItem item) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final keys = _headingKeysNotifier.value;
+      if (index >= 0 && index < keys.length) {
+        final keyCtx = keys[index].currentContext;
+        if (keyCtx != null) {
+          Scrollable.ensureVisible(
+            keyCtx,
+            duration: AppDuration.base,
+            curve: Curves.easeInOut,
+            alignment: 0.1,
+          );
+        }
+      }
+    });
   }
 
   // ── Build ───────────────────────────────────────────────────────────
@@ -179,7 +201,7 @@ class _KnowledgeBaseViewState extends State<_KnowledgeBaseView> {
                   context.read<ThemeCubit>().setThemeMode(theme);
                 },
                 onToggleSidePanel: () {
-                  if (screen != ScreenSize.mobile) {
+                  if (Responsive.isTabletOrLarger(context)) {
                     context.read<NavigationBloc>().add(const ToggleSidePanel());
                   } else {
                     _openNavigationDrawer(context, navState);
@@ -189,7 +211,7 @@ class _KnowledgeBaseViewState extends State<_KnowledgeBaseView> {
                   context.read<NavigationBloc>().add(SelectFile(filePath));
                 },
                 onToggleTocPanel: () {
-                  if (screen != ScreenSize.mobile) {
+                  if (Responsive.isTabletOrLarger(context)) {
                     context.read<NavigationBloc>().add(const ToggleTocPanel());
                   } else {
                     _openTocDrawer(context);
@@ -260,10 +282,11 @@ class _KnowledgeBaseViewState extends State<_KnowledgeBaseView> {
           )
         : <DirTreeItem>[];
 
-    // On mobile: no inline side panels at all — use drawers
-    if (screen == ScreenSize.mobile) {
+    // On phone/mobile: no inline side panels at all — use drawers
+    if (Responsive.isMobileOrSmaller(context)) {
       return CenterPanelWidget(
         visibleHeadingsNotifier: _visibleHeadingsNotifier,
+        headingKeysNotifier: _headingKeysNotifier,
       );
     }
 
@@ -271,7 +294,7 @@ class _KnowledgeBaseViewState extends State<_KnowledgeBaseView> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Side panel: shown on tablet (if toggled) and desktop (if toggled)
-        if (navState.showSidePanel && screen != ScreenSize.mobile) ...[
+        if (navState.showSidePanel && Responsive.isTabletOrLarger(context)) ...[
           Semantics(
             label: 'Documentation navigation tree',
             child: DirectoriesTreeWidget(
@@ -292,12 +315,13 @@ class _KnowledgeBaseViewState extends State<_KnowledgeBaseView> {
           flex: 3,
           child: CenterPanelWidget(
             visibleHeadingsNotifier: _visibleHeadingsNotifier,
+            headingKeysNotifier: _headingKeysNotifier,
           ),
         ),
         // TOC: on desktop/tablet when viewing a file and showTocPanel is true
         if (navState.viewMode == ViewMode.file &&
             navState.showTocPanel &&
-            screen != ScreenSize.mobile) ...[
+            Responsive.isTabletOrLarger(context)) ...[
           const VerticalDivider(),
           Semantics(
             label: 'Table of contents',
@@ -309,7 +333,9 @@ class _KnowledgeBaseViewState extends State<_KnowledgeBaseView> {
                   valueListenable: _visibleHeadingsNotifier,
                   builder: (context, visibleIndices, _) {
                     return TableOfContentWidget(
+                      width: Responsive.sidePanelWidth(context),
                       activeItemIndices: visibleIndices,
+                      onItemTapped: _onItemTapped,
                       items: headings
                           .map(
                             (h) => TOCItem(

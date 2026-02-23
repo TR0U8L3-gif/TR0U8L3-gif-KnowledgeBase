@@ -45,12 +45,14 @@ class TableOfContentWidget extends StatelessWidget {
     required this.items,
     required this.activeItemIndices,
     this.width,
+    this.onItemTapped,
     super.key,
   });
 
   final Set<int> activeItemIndices;
   final List<TOCItem> items;
   final double? width;
+  final void Function(int index, TOCItem item)? onItemTapped;
 
   @override
   Widget build(BuildContext context) {
@@ -59,16 +61,6 @@ class TableOfContentWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            height: navigationSize,
-            alignment: Alignment.centerLeft,
-            padding: const EdgeInsets.symmetric(
-              horizontal: SizePadding.large,
-              vertical: SizePadding.base,
-            ),
-            child: const Text('On This Page').semiBold().muted(),
-          ),
-          const Divider(),
           Expanded(
             child: SingleChildScrollView(
               padding: EdgeInsets.all(SizePadding.base),
@@ -89,6 +81,8 @@ class TableOfContentWidget extends StatelessWidget {
                             _TocItem(
                               item: items[index],
                               isActive: activeItemIndices.contains(index),
+                              index: index,
+                              onTap: onItemTapped,
                             ),
                         ],
                       ),
@@ -247,8 +241,15 @@ class _ProgressBarPainter extends CustomPainter {
 class _TocItem extends StatelessWidget {
   final TOCItem item;
   final bool isActive;
+  final int index;
+  final void Function(int index, TOCItem item)? onTap;
 
-  const _TocItem({required this.item, this.isActive = false});
+  const _TocItem({
+    required this.item,
+    required this.index,
+    this.isActive = false,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -259,7 +260,7 @@ class _TocItem extends StatelessWidget {
       label:
           'Heading level ${item.heading.level}: ${item.title}${isActive ? ', currently visible' : ''}',
       child: TextButton(
-        onPressed: () {},
+        onPressed: () => onTap?.call(index, item),
         density: ButtonDensity.compact,
         child: Tooltip(
           waitDuration: AppDuration.extraLarge,
