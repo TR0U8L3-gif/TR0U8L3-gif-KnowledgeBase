@@ -56,6 +56,8 @@ class MainApp extends StatelessWidget {
                         : ColorSchemes.lightDefaultColor,
                     radius: 0.5,
                   ),
+                  popoverHandler: const PopoverOverlayHandler(),
+                  menuHandler: const PopoverOverlayHandler(),
                   home: const KnowledgeBasePage(),
                 );
               },

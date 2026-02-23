@@ -3,7 +3,7 @@ const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 
-const RESOURCES = {"flutter_bootstrap.js": "311e0e69b9b857590fa565fd6718fc8c",
+const RESOURCES = {"flutter_bootstrap.js": "f7aead2c07732988035d8c58229b9355",
 "version.json": "5ccf423eeaaa4eda5e38e5b3a098063e",
 "index.html": "313c867e8f9b61e5e3994a7b9ea8e5e4",
 "/": "313c867e8f9b61e5e3994a7b9ea8e5e4",
@@ -34,7 +34,7 @@ const RESOURCES = {"flutter_bootstrap.js": "311e0e69b9b857590fa565fd6718fc8c",
 "favicons/apple-icon-120x120.png": "43cd1058932bfd22dddcbba86d62d284",
 "favicons/favicon-32x32.png": "060b4f3c490aa69c94e3246eb4f10d45",
 "favicons/ms-icon-70x70.png": "7554fca589a6f7052ca34d31db7bfaea",
-"main.dart.js": "ee4cddd5f8bcf72270061f71cd368368",
+"main.dart.js": "23e228b1ced6cdb9667c9d0051c65b89",
 "flutter.js": "24bc71911b75b5f8135c949e27a2984e",
 "web_loader.js": "225a3c5968b5fc9d3959a898d78c789a",
 "manifest.json": "7e2362bdecc85f99fc2385bc0609516a",

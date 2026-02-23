@@ -64,7 +64,7 @@ class HeaderWidget extends StatelessWidget {
                     : showSidePanel
                     ? BootstrapIcons.layoutSidebarInset
                     : BootstrapIcons.layoutSidebar,
-                size: iconSize
+                size: iconSize,
               ),
             ),
           ),
@@ -85,7 +85,7 @@ class HeaderWidget extends StatelessWidget {
                     : showTocPanel
                     ? BootstrapIcons.layoutSidebarInsetReverse
                     : BootstrapIcons.layoutSidebarReverse,
-                size: iconSize
+                size: iconSize,
               ),
             ),
           ),
@@ -97,10 +97,7 @@ class HeaderWidget extends StatelessWidget {
                 _showSearchPopover(context);
               },
               density: ButtonDensity.icon,
-              child: Icon(
-                BootstrapIcons.search,
-                size: iconSize
-              ),
+              child: Icon(BootstrapIcons.search, size: iconSize),
             ),
           ),
           Semantics(
@@ -111,10 +108,7 @@ class HeaderWidget extends StatelessWidget {
                 _showThemeDropdown(context);
               },
               density: ButtonDensity.icon,
-              child: Icon(
-                BootstrapIcons.sunFill,
-                size: iconSize
-              ),
+              child: Icon(BootstrapIcons.sunFill, size: iconSize),
             ),
           ),
           if (!isMobileOrSmaller)
@@ -124,10 +118,7 @@ class HeaderWidget extends StatelessWidget {
               child: OutlineButton(
                 onPressed: onTapGithub,
                 density: ButtonDensity.icon,
-                child: Icon(
-                  BootstrapIcons.github,
-                  size: iconSize
-                ),
+                child: Icon(BootstrapIcons.github, size: iconSize),
               ),
             ),
         ],
@@ -266,7 +257,7 @@ class _SearchPopoverContentState extends State<_SearchPopoverContent> {
         child: ConstrainedBox(
           constraints: BoxConstraints(
             maxWidth: widget.isMobileOrSmaller
-                ? MediaQuery.sizeOf(context).width  - 18
+                ? MediaQuery.sizeOf(context).width - 18
                 : 560,
             maxHeight: widget.isMobileOrSmaller
                 ? MediaQuery.sizeOf(context).height * 0.60
