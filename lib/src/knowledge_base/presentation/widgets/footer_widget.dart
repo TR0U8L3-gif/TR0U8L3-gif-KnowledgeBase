@@ -21,17 +21,26 @@ class FooterWidget extends StatelessWidget {
     return Semantics(
       label: 'Page navigation, page $currentPage of $totalPages',
       child: AppBar(
-        height: 40,
-        padding: isMobileOrSmaller ? const EdgeInsets.symmetric(vertical: 8) : null,
+        height: 36,
+        padding: isMobileOrSmaller
+            ? EdgeInsets.all(8)
+            : null,
         child: Center(
-          child: Pagination(
-            page: currentPage,
-            totalPages: totalPages,
-            maxPages: isMobileOrSmaller ? 1 : 3,
-            gap: isMobileOrSmaller ? 4 : 8,
-            onPageChanged: onPageChanged,
-            showSkipToFirstPage: !isPhone,
-            showSkipToLastPage: !isPhone,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Pagination(
+              page: currentPage,
+              totalPages: totalPages,
+              maxPages: isPhone
+                  ? 1
+                  : isMobileOrSmaller
+                  ? 2
+                  : 3,
+              gap: 8,
+              onPageChanged: onPageChanged,
+              showSkipToFirstPage: !isMobileOrSmaller,
+              showSkipToLastPage: !isMobileOrSmaller,
+            ),
           ),
         ),
       ),

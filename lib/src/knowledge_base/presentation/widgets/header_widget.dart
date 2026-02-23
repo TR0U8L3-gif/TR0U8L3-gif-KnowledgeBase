@@ -142,7 +142,7 @@ class HeaderWidget extends StatelessWidget {
     showPopover(
       context: context,
       alignment: Alignment.topRight,
-      offset: isMobileOrSmaller ? const Offset(16, 12) : const Offset(96, 12),
+      offset: isMobileOrSmaller ? const Offset(0, 12) : const Offset(96, 12),
       overlayBarrier: OverlayBarrier(borderRadius: theme.borderRadiusLg),
       builder: (ctx) => _SearchPopoverContent(
         allFiles: allFiles,
@@ -161,7 +161,7 @@ class HeaderWidget extends StatelessWidget {
     showDropdown(
       context: context,
       alignment: Alignment.topRight,
-      offset: isMobileOrSmaller ? const Offset(8, 12) : const Offset(52, 12),
+      offset: isMobileOrSmaller ? const Offset(0, 12) : const Offset(52, 12),
       consumeOutsideTaps: true,
       builder: (ctx) {
         return DropdownMenu(
@@ -266,7 +266,7 @@ class _SearchPopoverContentState extends State<_SearchPopoverContent> {
         child: ConstrainedBox(
           constraints: BoxConstraints(
             maxWidth: widget.isMobileOrSmaller
-                ? MediaQuery.sizeOf(context).width - 48
+                ? MediaQuery.sizeOf(context).width  - 18
                 : 560,
             maxHeight: widget.isMobileOrSmaller
                 ? MediaQuery.sizeOf(context).height * 0.60
