@@ -1,0 +1,5 @@
+- add functionality to support saving articles as favorite to local storage 
+  - check if saved article exist in current file hierarchy
+    - if not find article by name otherwise remove it from saved  
+- add better code formatting with colors and proper indentation
+- add drawio and mermaid support
