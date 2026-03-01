@@ -18,6 +18,8 @@ dependencies:
   provider: ^6.1.4
   equatable: ^2.0.7
   url_launcher: ^6.3.2
+  flutter_markdown_plus: ^1.0.7
+  markdown: ^7.3.0
 
 dev_dependencies:
   flutter_test:
@@ -38,4 +40,5 @@ flutter:
     - assets/data/index.json
     - assets/data/ops/incident-template.md
     - assets/data/ops/release-checklist.md
+    - assets/data/test.md
   uses-material-design: true
