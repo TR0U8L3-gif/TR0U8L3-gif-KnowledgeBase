@@ -1,6 +1,7 @@
 import 'package:knowledge_base/core/utils/constants.dart';
 import 'package:knowledge_base/core/utils/responsive.dart';
 import 'package:knowledge_base/src/knowledge_base/domain/entities/knowledge_base_item.dart';
+import 'package:knowledge_base/src/knowledge_base/presentation/widgets/tag_chip_widget.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 /// Displays a directory's info and a grid of cards for each item it contains.
@@ -196,22 +197,7 @@ class _ItemCard extends StatelessWidget {
           Wrap(
             spacing: 6,
             runSpacing: 4,
-            children: file.tags.map((tag) {
-              return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.muted.withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  tag,
-                  style: TextStyle(
-                    fontSize: 11 * theme.scaling,
-                    color: theme.colorScheme.mutedForeground,
-                  ),
-                ),
-              );
-            }).toList(),
+            children: file.tags.map((tag) => TagChipWidget(tag: tag)).toList(),
           ),
 
         // Dates row

@@ -1,3 +1,4 @@
+import 'package:knowledge_base/src/knowledge_base/presentation/widgets/tag_chip_widget.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 // ── Markdown block types ────────────────────────────────────────────────────
@@ -56,6 +57,7 @@ class MarkdownRendererWidget extends StatelessWidget {
   final String? description;
   final DateTime? lastModified;
   final List<GlobalKey>? headingKeys;
+  final List<String> tags;
 
   const MarkdownRendererWidget({
     required this.markdown,
@@ -63,6 +65,7 @@ class MarkdownRendererWidget extends StatelessWidget {
     this.description,
     this.lastModified,
     this.headingKeys,
+    this.tags = const [],
     super.key,
   });
 
@@ -101,7 +104,17 @@ class MarkdownRendererWidget extends StatelessWidget {
           ],
           if (description != null) ...[
             Text(description!).lead(),
+            const Gap(12),
+          ],
+          if (tags.isNotEmpty) ...[
+            Wrap(
+              spacing: 6,
+              runSpacing: 4,
+              children: tags.map((t) => TagChipWidget(tag: t)).toList(),
+            ),
             const Gap(24),
+          ] else if (description != null) ...[
+            const Gap(12),
           ],
           ...blockWidgets,
         ],

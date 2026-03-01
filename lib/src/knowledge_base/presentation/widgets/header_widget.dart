@@ -1,10 +1,11 @@
 import 'package:knowledge_base/core/utils/constants.dart';
 import 'package:knowledge_base/core/utils/responsive.dart';
+import 'package:knowledge_base/src/knowledge_base/presentation/widgets/tag_chip_widget.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 import '../../domain/entities/knowledge_base_item.dart';
 
-class HeaderWidget extends StatelessWidget {
+class HeaderWidget extends StatefulWidget {
   final VoidCallback onToggleSidePanel;
   final VoidCallback onToggleTocPanel;
   final VoidCallback onTapGithub;
@@ -14,6 +15,9 @@ class HeaderWidget extends StatelessWidget {
   final bool showSidePanel;
   final bool showTocPanel;
   final ScreenSize screenSize;
+
+  /// Fires whenever the window size changes so open popovers can be dismissed.
+  final ValueNotifier<Size>? resizeNotifier;
 
   const HeaderWidget({
     super.key,
@@ -26,7 +30,45 @@ class HeaderWidget extends StatelessWidget {
     required this.showSidePanel,
     required this.showTocPanel,
     this.screenSize = ScreenSize.desktop,
+    this.resizeNotifier,
   });
+
+  @override
+  State<HeaderWidget> createState() => _HeaderWidgetState();
+}
+
+class _HeaderWidgetState extends State<HeaderWidget> {
+  /// Tracks the currently open overlay so it can be closed on resize.
+  OverlayCompleter<void>? _activeOverlay;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.resizeNotifier?.addListener(_onResize);
+  }
+
+  @override
+  void didUpdateWidget(covariant HeaderWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.resizeNotifier != widget.resizeNotifier) {
+      oldWidget.resizeNotifier?.removeListener(_onResize);
+      widget.resizeNotifier?.addListener(_onResize);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.resizeNotifier?.removeListener(_onResize);
+    super.dispose();
+  }
+
+  void _onResize() {
+    final overlay = _activeOverlay;
+    if (overlay != null && !overlay.isCompleted) {
+      overlay.remove();
+      _activeOverlay = null;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,16 +94,16 @@ class HeaderWidget extends StatelessWidget {
         leading: [
           Semantics(
             button: true,
-            label: showSidePanel
+            label: widget.showSidePanel
                 ? 'Close navigation panel'
                 : 'Open navigation panel',
             child: OutlineButton(
-              onPressed: onToggleSidePanel,
+              onPressed: widget.onToggleSidePanel,
               density: ButtonDensity.icon,
               child: Icon(
                 isMobileOrSmaller
                     ? BootstrapIcons.list
-                    : showSidePanel
+                    : widget.showSidePanel
                     ? BootstrapIcons.layoutSidebarInset
                     : BootstrapIcons.layoutSidebar,
                 size: iconSize,
@@ -73,16 +115,16 @@ class HeaderWidget extends StatelessWidget {
           // TOC button — always visible
           Semantics(
             button: true,
-            label: showTocPanel
+            label: widget.showTocPanel
                 ? 'Close table of contents'
                 : 'Open table of contents',
             child: OutlineButton(
-              onPressed: onToggleTocPanel,
+              onPressed: widget.onToggleTocPanel,
               density: ButtonDensity.icon,
               child: Icon(
                 isMobileOrSmaller
                     ? BootstrapIcons.listNested
-                    : showTocPanel
+                    : widget.showTocPanel
                     ? BootstrapIcons.layoutSidebarInsetReverse
                     : BootstrapIcons.layoutSidebarReverse,
                 size: iconSize,
@@ -116,7 +158,7 @@ class HeaderWidget extends StatelessWidget {
               button: true,
               label: 'Open GitHub profile',
               child: OutlineButton(
-                onPressed: onTapGithub,
+                onPressed: widget.onTapGithub,
                 density: ButtonDensity.icon,
                 child: Icon(BootstrapIcons.github, size: iconSize),
               ),
@@ -130,17 +172,17 @@ class HeaderWidget extends StatelessWidget {
     final theme = Theme.of(context);
     final isMobileOrSmaller = Responsive.isMobileOrSmaller(context);
 
-    showPopover(
+    _activeOverlay = showPopover(
       context: context,
       alignment: Alignment.topRight,
       offset: isMobileOrSmaller ? const Offset(0, 12) : const Offset(96, 12),
       overlayBarrier: OverlayBarrier(borderRadius: theme.borderRadiusLg),
       builder: (ctx) => _SearchPopoverContent(
-        allFiles: allFiles,
+        allFiles: widget.allFiles,
         isMobileOrSmaller: isMobileOrSmaller,
         onFileSelected: (filePath) {
           closeOverlay(ctx);
-          onSearchResultSelected(filePath);
+          widget.onSearchResultSelected(filePath);
         },
       ),
     );
@@ -149,7 +191,7 @@ class HeaderWidget extends StatelessWidget {
   void _showThemeDropdown(BuildContext context) {
     const menuGap = MenuGap(4);
     final isMobileOrSmaller = Responsive.isMobileOrSmaller(context);
-    showDropdown(
+    _activeOverlay = showDropdown(
       context: context,
       alignment: Alignment.topRight,
       offset: isMobileOrSmaller ? const Offset(0, 12) : const Offset(52, 12),
@@ -166,7 +208,7 @@ class HeaderWidget extends StatelessWidget {
               leading: Icon(LucideIcons.sunMoon),
               child: Text('System'),
               onPressed: (context) {
-                onSelectTheme(ThemeMode.system);
+                widget.onSelectTheme(ThemeMode.system);
                 closeOverlay(context);
               },
             ),
@@ -175,7 +217,7 @@ class HeaderWidget extends StatelessWidget {
               leading: Icon(LucideIcons.sun),
               child: Text('Light'),
               onPressed: (context) {
-                onSelectTheme(ThemeMode.light);
+                widget.onSelectTheme(ThemeMode.light);
                 closeOverlay(context);
               },
             ),
@@ -184,7 +226,7 @@ class HeaderWidget extends StatelessWidget {
               leading: Icon(LucideIcons.moon),
               child: Text('Dark'),
               onPressed: (context) {
-                onSelectTheme(ThemeMode.dark);
+                widget.onSelectTheme(ThemeMode.dark);
                 closeOverlay(context);
               },
             ),
@@ -234,6 +276,18 @@ class _SearchPopoverContentState extends State<_SearchPopoverContent> {
     setState(() {
       if (query.isEmpty) {
         _filteredFiles = widget.allFiles;
+      } else if (query.startsWith('#')) {
+        final tagQuery = query.substring(1).trim();
+        if (tagQuery.isEmpty) {
+          _filteredFiles = widget.allFiles;
+        } else {
+          _filteredFiles = widget.allFiles
+              .where(
+                (file) =>
+                    file.tags.any((t) => t.toLowerCase().contains(tagQuery)),
+              )
+              .toList();
+        }
       } else {
         _filteredFiles = widget.allFiles
             .where(
@@ -274,7 +328,7 @@ class _SearchPopoverContentState extends State<_SearchPopoverContent> {
                 textField: true,
                 child: TextField(
                   controller: _controller,
-                  placeholder: const Text('Type a filename to search...'),
+                  placeholder: const Text('Search by name or #tag...'),
                   features: [const InputFeature.clear()],
                 ),
               ),
@@ -299,6 +353,9 @@ class _SearchPopoverContentState extends State<_SearchPopoverContent> {
                         itemCount: _filteredFiles.length,
                         itemBuilder: (context, index) {
                           final file = _filteredFiles[index];
+                          final isTagSearch = _controller.text
+                              .trim()
+                              .startsWith('#');
                           return Padding(
                             padding: index == _filteredFiles.length - 1
                                 ? EdgeInsets.zero
@@ -306,6 +363,7 @@ class _SearchPopoverContentState extends State<_SearchPopoverContent> {
                             child: _SearchResultTile(
                               file: file,
                               onTap: () => widget.onFileSelected(file.path),
+                              showTags: isTagSearch,
                             ),
                           );
                         },
@@ -322,8 +380,13 @@ class _SearchPopoverContentState extends State<_SearchPopoverContent> {
 class _SearchResultTile extends StatelessWidget {
   final FileItem file;
   final VoidCallback onTap;
+  final bool showTags;
 
-  const _SearchResultTile({required this.file, required this.onTap});
+  const _SearchResultTile({
+    required this.file,
+    required this.onTap,
+    this.showTags = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -353,6 +416,16 @@ class _SearchResultTile extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ).muted().xSmall(),
+                      if (showTags && file.tags.isNotEmpty) ...[
+                        const Gap(4),
+                        Wrap(
+                          spacing: 4,
+                          runSpacing: 4,
+                          children: file.tags
+                              .map((t) => TagChipWidget(tag: t))
+                              .toList(),
+                        ),
+                      ],
                     ],
                   ),
                 ),

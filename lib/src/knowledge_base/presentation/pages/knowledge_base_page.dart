@@ -47,15 +47,41 @@ class _KnowledgeBaseView extends StatefulWidget {
   State<_KnowledgeBaseView> createState() => _KnowledgeBaseViewState();
 }
 
-class _KnowledgeBaseViewState extends State<_KnowledgeBaseView> {
+class _KnowledgeBaseViewState extends State<_KnowledgeBaseView>
+    with WidgetsBindingObserver {
   final ValueNotifier<Set<int>> _visibleHeadingsNotifier = ValueNotifier({});
   final ValueNotifier<List<GlobalKey>> _headingKeysNotifier = ValueNotifier([]);
 
+  /// Tracks the last known window size to detect resize events.
+  Size? _lastSize;
+
+  /// Notifier that fires whenever the window size changes. Listeners
+  /// (e.g. [HeaderWidget]) can use this to close open popovers / dropdowns.
+  final ValueNotifier<Size> _resizeNotifier = ValueNotifier(Size.zero);
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _resizeNotifier.dispose();
     _visibleHeadingsNotifier.dispose();
     _headingKeysNotifier.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final currentSize = MediaQuery.sizeOf(context);
+    if (_lastSize != null && _lastSize != currentSize) {
+      _resizeNotifier.value = currentSize;
+    }
+    _lastSize = currentSize;
   }
 
   // ── Drawer helpers ──────────────────────────────────────────────────
@@ -190,6 +216,7 @@ class _KnowledgeBaseViewState extends State<_KnowledgeBaseView> {
           return Scaffold(
             headers: [
               HeaderWidget(
+                resizeNotifier: _resizeNotifier,
                 onTapGithub: () {
                   launchUrl(
                     Uri.parse('https://github.com/TR0U8L3-gif'),

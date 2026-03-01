@@ -251,6 +251,7 @@ class _DocumentContentState extends State<_DocumentContent> {
             description: file?.description,
             lastModified: file?.lastModified,
             headingKeys: _headingKeys,
+            tags: file?.tags ?? [],
           ),
         );
       },
