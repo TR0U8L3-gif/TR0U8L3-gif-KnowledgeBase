@@ -9,7 +9,7 @@ MarkdownStyleSheet shadcnMarkdownStyleSheet(BuildContext context) {
   final typography = theme.typography;
   final scaling = theme.scaling;
 
-  final monoStyle = TextStyle(fontFamily: 'monospace', fontSize: 13 * scaling);
+  final monoStyle = TextStyle(fontFamily: 'monospace', fontSize: 14 * scaling);
 
   return MarkdownStyleSheet(
     // Headings
@@ -53,10 +53,10 @@ MarkdownStyleSheet shadcnMarkdownStyleSheet(BuildContext context) {
     // Fenced code blocks
     codeblockDecoration: BoxDecoration(
       color: colorScheme.muted.withValues(alpha: 0.15),
-      borderRadius: BorderRadius.circular(6 * scaling),
+      borderRadius: BorderRadius.circular(12 * scaling),
       border: Border.all(color: colorScheme.border, width: 0.5),
     ),
-    codeblockPadding: EdgeInsets.all(12 * scaling),
+    codeblockPadding: EdgeInsets.all(14 * scaling),
 
     // Blockquote
     blockquote: typography.base.copyWith(
@@ -70,14 +70,14 @@ MarkdownStyleSheet shadcnMarkdownStyleSheet(BuildContext context) {
       horizontal: 16 * scaling,
       vertical: 8 * scaling,
     ),
-
     // Tables
+    tableColumnWidth: const IntrinsicColumnWidth(),
     tableHead: TextStyle(
       fontWeight: FontWeight.w600,
-      fontSize: 13 * scaling,
+      fontSize: 14 * scaling,
       color: colorScheme.foreground,
     ),
-    tableBody: TextStyle(fontSize: 13 * scaling, color: colorScheme.foreground),
+    tableBody: TextStyle(fontSize: 14 * scaling, color: colorScheme.foreground),
     tableBorder: TableBorder.all(color: colorScheme.border, width: 0.5),
     tableCellsPadding: EdgeInsets.symmetric(
       horizontal: 12 * scaling,

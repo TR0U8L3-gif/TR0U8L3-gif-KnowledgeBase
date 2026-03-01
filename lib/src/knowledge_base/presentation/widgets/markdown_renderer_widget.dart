@@ -1,10 +1,12 @@
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:knowledge_base/src/knowledge_base/presentation/widgets/_helpers/heading_key_builder.dart';
 import 'package:knowledge_base/src/knowledge_base/presentation/widgets/_helpers/markdown_style_sheet_adapter.dart';
 import 'package:knowledge_base/src/knowledge_base/presentation/widgets/tag_chip_widget.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:http/http.dart' as http;
 
 // ── Markdown renderer widget ────────────────────────────────────────────────
 
@@ -69,22 +71,26 @@ class MarkdownRendererWidget extends StatelessWidget {
           ] else if (description != null) ...[
             const Gap(12),
           ],
-          MarkdownBody(
-            data: markdown,
-            selectable: true,
-            extensionSet: md.ExtensionSet.gitHubFlavored,
-            styleSheet: shadcnMarkdownStyleSheet(context),
-            builders: {
-              'h1': headingBuilder,
-              'h2': headingBuilder,
-              'h3': headingBuilder,
-              'h4': headingBuilder,
-              'h5': headingBuilder,
-              'h6': headingBuilder,
-            },
-            onTapLink: (text, href, title) => _handleLink(href),
-            onTapText: onTapText,
-            onSelectionChanged: onSelectionChanged,
+          SizedBox(
+            width: double.infinity,
+            child: MarkdownBody(
+              data: markdown,
+              selectable: true,
+              extensionSet: md.ExtensionSet.gitHubFlavored,
+              styleSheet: shadcnMarkdownStyleSheet(context),
+              builders: {
+                'h1': headingBuilder,
+                'h2': headingBuilder,
+                'h3': headingBuilder,
+                'h4': headingBuilder,
+                'h5': headingBuilder,
+                'h6': headingBuilder,
+              },
+              imageBuilder: _imageBuilder,
+              onTapLink: (text, href, title) => _handleLink(href),
+              onTapText: onTapText,
+              onSelectionChanged: onSelectionChanged,
+            ),
           ),
         ],
       ),
@@ -107,6 +113,43 @@ class MarkdownRendererWidget extends StatelessWidget {
       'December',
     ];
     return '${months[date.month - 1]} ${date.day}, ${date.year}';
+  }
+
+  Widget _imageBuilder(Uri uri, String? title, String? alt) {
+    const errorWidget = Icon(Icons.broken_image, size: 48);
+    const loadingWidget = SizedBox(
+      width: 24,
+      height: 24,
+      child: CircularProgressIndicator(strokeWidth: 2),
+    );
+
+    return FutureBuilder<http.Response>(
+      future: http.get(uri),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return loadingWidget;
+        }
+
+        if (snapshot.hasError || !snapshot.hasData) {
+          return errorWidget;
+        }
+
+        final response = snapshot.data!;
+
+        if (response.statusCode != 200) {
+          return errorWidget;
+        }
+
+        final contentType = response.headers['content-type'] ?? '';
+        final bytes = response.bodyBytes;
+
+        if (contentType.contains('image/svg')) {
+          return SvgPicture.memory(bytes);
+        }
+
+        return Image.memory(bytes, fit: BoxFit.contain);
+      },
+    );
   }
 
   Future<void> _handleLink(String? href) async {
