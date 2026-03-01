@@ -52,6 +52,10 @@ class _KnowledgeBaseViewState extends State<_KnowledgeBaseView>
   final ValueNotifier<Set<int>> _visibleHeadingsNotifier = ValueNotifier({});
   final ValueNotifier<List<GlobalKey>> _headingKeysNotifier = ValueNotifier([]);
 
+  /// Notifier used to open the search popover with a pre-filled tag query
+  /// from anywhere in the widget tree (e.g. tag chips in document / directory).
+  final ValueNotifier<String?> _pendingSearchQuery = ValueNotifier(null);
+
   /// Tracks the last known window size to detect resize events.
   Size? _lastSize;
 
@@ -71,6 +75,7 @@ class _KnowledgeBaseViewState extends State<_KnowledgeBaseView>
     _resizeNotifier.dispose();
     _visibleHeadingsNotifier.dispose();
     _headingKeysNotifier.dispose();
+    _pendingSearchQuery.dispose();
     super.dispose();
   }
 
@@ -217,6 +222,7 @@ class _KnowledgeBaseViewState extends State<_KnowledgeBaseView>
             headers: [
               HeaderWidget(
                 resizeNotifier: _resizeNotifier,
+                pendingSearchQuery: _pendingSearchQuery,
                 onTapGithub: () {
                   launchUrl(
                     Uri.parse('https://github.com/TR0U8L3-gif'),
@@ -314,6 +320,7 @@ class _KnowledgeBaseViewState extends State<_KnowledgeBaseView>
       return CenterPanelWidget(
         visibleHeadingsNotifier: _visibleHeadingsNotifier,
         headingKeysNotifier: _headingKeysNotifier,
+        onTagTapped: (tag) => _pendingSearchQuery.value = '#$tag',
       );
     }
 
@@ -343,6 +350,7 @@ class _KnowledgeBaseViewState extends State<_KnowledgeBaseView>
           child: CenterPanelWidget(
             visibleHeadingsNotifier: _visibleHeadingsNotifier,
             headingKeysNotifier: _headingKeysNotifier,
+            onTagTapped: (tag) => _pendingSearchQuery.value = '#$tag',
           ),
         ),
         // TOC: on desktop/tablet when viewing a file and showTocPanel is true

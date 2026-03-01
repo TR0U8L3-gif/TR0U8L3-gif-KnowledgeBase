@@ -5,17 +5,22 @@ import 'package:shadcn_flutter/shadcn_flutter.dart';
 ///
 /// The background, border, and text color are derived deterministically from
 /// the tag string via [TagColors.forTag].
+///
+/// Provide [onTap] to make the chip interactive (e.g. open a tag search).
 class TagChipWidget extends StatelessWidget {
   final String tag;
 
-  const TagChipWidget({required this.tag, super.key});
+  /// Optional callback invoked when the chip is tapped.
+  final VoidCallback? onTap;
+
+  const TagChipWidget({required this.tag, this.onTap, super.key});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final color = TagColors.forTag(tag);
 
-    return Container(
+    final chip = Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.15),
@@ -30,6 +35,13 @@ class TagChipWidget extends StatelessWidget {
           fontWeight: FontWeight.w500,
         ),
       ),
+    );
+
+    if (onTap == null) return chip;
+
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(onTap: onTap, child: chip),
     );
   }
 }

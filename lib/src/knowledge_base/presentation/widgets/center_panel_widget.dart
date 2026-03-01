@@ -16,6 +16,7 @@ class CenterPanelWidget extends StatelessWidget {
   const CenterPanelWidget({
     this.visibleHeadingsNotifier,
     this.headingKeysNotifier,
+    this.onTagTapped,
     super.key,
   });
 
@@ -24,6 +25,10 @@ class CenterPanelWidget extends StatelessWidget {
   /// Notifier populated with the [GlobalKey] list for each rendered heading.
   /// Consumers (e.g. the TOC panel) can read these keys to scroll to a heading.
   final ValueNotifier<List<GlobalKey>>? headingKeysNotifier;
+
+  /// Called when a tag chip is tapped — propagated to the document / directory
+  /// widgets so they can open a tag search in the header.
+  final void Function(String tag)? onTagTapped;
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +59,7 @@ class CenterPanelWidget extends StatelessWidget {
                   navState.selectedDirectory != null) {
                 return DirectoryViewWidget(
                   directory: navState.selectedDirectory!,
+                  onTagTapped: onTagTapped,
                   onFileSelected: (path) {
                     context.read<NavigationBloc>().add(SelectFile(path));
                   },
@@ -97,6 +103,7 @@ class CenterPanelWidget extends StatelessWidget {
                       docState: docState,
                       visibleHeadingsNotifier: visibleHeadingsNotifier,
                       headingKeysNotifier: headingKeysNotifier,
+                      onTagTapped: onTagTapped,
                     ),
                   };
                 },
@@ -113,11 +120,13 @@ class _DocumentContent extends StatefulWidget {
   final DocumentState docState;
   final ValueNotifier<Set<int>>? visibleHeadingsNotifier;
   final ValueNotifier<List<GlobalKey>>? headingKeysNotifier;
+  final void Function(String tag)? onTagTapped;
 
   const _DocumentContent({
     required this.docState,
     this.visibleHeadingsNotifier,
     this.headingKeysNotifier,
+    this.onTagTapped,
   });
 
   @override
@@ -252,6 +261,7 @@ class _DocumentContentState extends State<_DocumentContent> {
             lastModified: file?.lastModified,
             headingKeys: _headingKeys,
             tags: file?.tags ?? [],
+            onTagTapped: widget.onTagTapped,
           ),
         );
       },

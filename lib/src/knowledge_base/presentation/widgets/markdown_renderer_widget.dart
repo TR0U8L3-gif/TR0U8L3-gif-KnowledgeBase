@@ -26,6 +26,9 @@ class MarkdownRendererWidget extends StatelessWidget {
   /// Called when the text selection changes within the markdown body.
   final MarkdownOnSelectionChangedCallback? onSelectionChanged;
 
+  /// Called when a tag chip is tapped — e.g. to open a tag search.
+  final void Function(String tag)? onTagTapped;
+
   const MarkdownRendererWidget({
     required this.markdown,
     this.title,
@@ -35,6 +38,7 @@ class MarkdownRendererWidget extends StatelessWidget {
     this.tags = const [],
     this.onTapText,
     this.onSelectionChanged,
+    this.onTagTapped,
     super.key,
   });
 
@@ -65,7 +69,14 @@ class MarkdownRendererWidget extends StatelessWidget {
             Wrap(
               spacing: 6,
               runSpacing: 4,
-              children: tags.map((t) => TagChipWidget(tag: t)).toList(),
+              children: tags
+                  .map(
+                    (t) => TagChipWidget(
+                      tag: t,
+                      onTap: onTagTapped != null ? () => onTagTapped!(t) : null,
+                    ),
+                  )
+                  .toList(),
             ),
             const Gap(24),
           ] else if (description != null) ...[

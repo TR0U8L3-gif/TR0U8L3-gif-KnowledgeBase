@@ -19,6 +19,11 @@ class HeaderWidget extends StatefulWidget {
   /// Fires whenever the window size changes so open popovers can be dismissed.
   final ValueNotifier<Size>? resizeNotifier;
 
+  /// When set to a non-null value from outside, opens the search popover with
+  /// that string pre-filled (e.g. `'#flutter'`). The notifier is reset to
+  /// `null` after the popover is opened.
+  final ValueNotifier<String?>? pendingSearchQuery;
+
   const HeaderWidget({
     super.key,
     required this.onToggleSidePanel,
@@ -31,6 +36,7 @@ class HeaderWidget extends StatefulWidget {
     required this.showTocPanel,
     this.screenSize = ScreenSize.desktop,
     this.resizeNotifier,
+    this.pendingSearchQuery,
   });
 
   @override
@@ -45,6 +51,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
   void initState() {
     super.initState();
     widget.resizeNotifier?.addListener(_onResize);
+    widget.pendingSearchQuery?.addListener(_onPendingSearchQuery);
   }
 
   @override
@@ -54,11 +61,16 @@ class _HeaderWidgetState extends State<HeaderWidget> {
       oldWidget.resizeNotifier?.removeListener(_onResize);
       widget.resizeNotifier?.addListener(_onResize);
     }
+    if (oldWidget.pendingSearchQuery != widget.pendingSearchQuery) {
+      oldWidget.pendingSearchQuery?.removeListener(_onPendingSearchQuery);
+      widget.pendingSearchQuery?.addListener(_onPendingSearchQuery);
+    }
   }
 
   @override
   void dispose() {
     widget.resizeNotifier?.removeListener(_onResize);
+    widget.pendingSearchQuery?.removeListener(_onPendingSearchQuery);
     super.dispose();
   }
 
@@ -67,6 +79,14 @@ class _HeaderWidgetState extends State<HeaderWidget> {
     if (overlay != null && !overlay.isCompleted) {
       overlay.remove();
       _activeOverlay = null;
+    }
+  }
+
+  void _onPendingSearchQuery() {
+    final query = widget.pendingSearchQuery?.value;
+    if (query != null) {
+      widget.pendingSearchQuery!.value = null;
+      _showSearchPopover(context, initialQuery: query);
     }
   }
 
@@ -168,7 +188,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
     );
   }
 
-  void _showSearchPopover(BuildContext context) {
+  void _showSearchPopover(BuildContext context, {String? initialQuery}) {
     final theme = Theme.of(context);
     final isMobileOrSmaller = Responsive.isMobileOrSmaller(context);
 
@@ -180,6 +200,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
       builder: (ctx) => _SearchPopoverContent(
         allFiles: widget.allFiles,
         isMobileOrSmaller: isMobileOrSmaller,
+        initialQuery: initialQuery,
         onFileSelected: (filePath) {
           closeOverlay(ctx);
           widget.onSearchResultSelected(filePath);
@@ -242,11 +263,13 @@ class _SearchPopoverContent extends StatefulWidget {
   final List<FileItem> allFiles;
   final void Function(String filePath) onFileSelected;
   final bool isMobileOrSmaller;
+  final String? initialQuery;
 
   const _SearchPopoverContent({
     required this.allFiles,
     required this.onFileSelected,
     this.isMobileOrSmaller = false,
+    this.initialQuery,
   });
 
   @override
@@ -260,7 +283,8 @@ class _SearchPopoverContentState extends State<_SearchPopoverContent> {
   @override
   void initState() {
     super.initState();
-    _filteredFiles = widget.allFiles;
+    _controller.text = widget.initialQuery ?? '';
+    _filteredFiles = _filterFiles(_controller.text);
     _controller.addListener(_onSearchChanged);
   }
 
@@ -271,32 +295,28 @@ class _SearchPopoverContentState extends State<_SearchPopoverContent> {
     super.dispose();
   }
 
+  List<FileItem> _filterFiles(String query) {
+    final q = query.toLowerCase().trim();
+    if (q.isEmpty) return widget.allFiles;
+    if (q.startsWith('#')) {
+      final tagQuery = q.substring(1).trim();
+      if (tagQuery.isEmpty) return widget.allFiles;
+      return widget.allFiles
+          .where((file) => file.tags.any((t) => t.toLowerCase().contains(tagQuery)))
+          .toList();
+    }
+    return widget.allFiles
+        .where(
+          (file) =>
+              file.name.toLowerCase().contains(q) ||
+              file.path.toLowerCase().contains(q),
+        )
+        .toList();
+  }
+
   void _onSearchChanged() {
-    final query = _controller.text.toLowerCase().trim();
     setState(() {
-      if (query.isEmpty) {
-        _filteredFiles = widget.allFiles;
-      } else if (query.startsWith('#')) {
-        final tagQuery = query.substring(1).trim();
-        if (tagQuery.isEmpty) {
-          _filteredFiles = widget.allFiles;
-        } else {
-          _filteredFiles = widget.allFiles
-              .where(
-                (file) =>
-                    file.tags.any((t) => t.toLowerCase().contains(tagQuery)),
-              )
-              .toList();
-        }
-      } else {
-        _filteredFiles = widget.allFiles
-            .where(
-              (file) =>
-                  file.name.toLowerCase().contains(query) ||
-                  file.path.toLowerCase().contains(query),
-            )
-            .toList();
-      }
+      _filteredFiles = _filterFiles(_controller.text);
     });
   }
 
@@ -364,6 +384,9 @@ class _SearchPopoverContentState extends State<_SearchPopoverContent> {
                               file: file,
                               onTap: () => widget.onFileSelected(file.path),
                               showTags: isTagSearch,
+                              onTagTapped: (tag) {
+                                _controller.text = '#$tag';
+                              },
                             ),
                           );
                         },
@@ -382,10 +405,14 @@ class _SearchResultTile extends StatelessWidget {
   final VoidCallback onTap;
   final bool showTags;
 
+  /// Called when a tag chip inside this tile is tapped.
+  final void Function(String tag)? onTagTapped;
+
   const _SearchResultTile({
     required this.file,
     required this.onTap,
     this.showTags = false,
+    this.onTagTapped,
   });
 
   @override
@@ -422,7 +449,14 @@ class _SearchResultTile extends StatelessWidget {
                           spacing: 4,
                           runSpacing: 4,
                           children: file.tags
-                              .map((t) => TagChipWidget(tag: t))
+                              .map(
+                                (t) => TagChipWidget(
+                                  tag: t,
+                                  onTap: onTagTapped != null
+                                      ? () => onTagTapped!(t)
+                                      : null,
+                                ),
+                              )
                               .toList(),
                         ),
                       ],

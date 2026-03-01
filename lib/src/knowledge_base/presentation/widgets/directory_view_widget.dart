@@ -10,10 +10,14 @@ class DirectoryViewWidget extends StatelessWidget {
   final ValueChanged<String>? onFileSelected;
   final ValueChanged<String>? onDirectorySelected;
 
+  /// Called when a tag chip is tapped — e.g. to open a tag search.
+  final void Function(String tag)? onTagTapped;
+
   const DirectoryViewWidget({
     required this.directory,
     this.onFileSelected,
     this.onDirectorySelected,
+    this.onTagTapped,
     super.key,
   });
 
@@ -61,6 +65,7 @@ class DirectoryViewWidget extends StatelessWidget {
                     width: cardWidth,
                     child: _ItemCard(
                       item: item,
+                      onTagTapped: onTagTapped,
                       onTap: () {
                         if (item is FileItem) {
                           onFileSelected?.call(item.path);
@@ -89,8 +94,9 @@ class DirectoryViewWidget extends StatelessWidget {
 class _ItemCard extends StatelessWidget {
   final KnowledgeBaseItem item;
   final VoidCallback onTap;
+  final void Function(String tag)? onTagTapped;
 
-  const _ItemCard({required this.item, required this.onTap});
+  const _ItemCard({required this.item, required this.onTap, this.onTagTapped});
 
   @override
   Widget build(BuildContext context) {
@@ -197,7 +203,14 @@ class _ItemCard extends StatelessWidget {
           Wrap(
             spacing: 6,
             runSpacing: 4,
-            children: file.tags.map((tag) => TagChipWidget(tag: tag)).toList(),
+            children: file.tags
+                .map(
+                  (tag) => TagChipWidget(
+                    tag: tag,
+                    onTap: onTagTapped != null ? () => onTagTapped!(tag) : null,
+                  ),
+                )
+                .toList(),
           ),
 
         // Dates row
