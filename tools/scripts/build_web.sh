@@ -16,8 +16,18 @@ NC='\033[0m' # No Color
 
 echo -e "${GREEN}Starting Flutter web build process...${NC}"
 
-# Step 1: Build Flutter web
-echo -e "${YELLOW}Step 1: Building Flutter web app...${NC}"
+# Check if it is root of the project
+if [ ! -f "pubspec.yaml" ]; then
+    echo -e "${RED}Error: pubspec.yaml not found! Please run this script from the root of the project.${NC}"
+    exit 1
+fi
+
+# Index assets
+echo -e "${YELLOW}Indexing assets...${NC}"
+dart run bin/run.dart generate -s docs -a "assets/data"
+
+# Build Flutter web
+echo -e "${YELLOW}Building Flutter web app...${NC}"
 flutter build web --release
 
 if [ $? -ne 0 ]; then
@@ -27,8 +37,8 @@ fi
 
 echo -e "${GREEN}✓ Flutter build completed successfully${NC}"
 
-# Step 2: Copy build output to web/build
-echo -e "${YELLOW}Step 2: Copying build output to web/build...${NC}"
+# Copy build output to web/build
+echo -e "${YELLOW}Copying build output to web/build...${NC}"
 
 # Create web/build directory if it doesn't exist
 mkdir -p web/build
@@ -41,8 +51,8 @@ cp -r build/web/* web/build/
 
 echo -e "${GREEN}✓ Files copied successfully${NC}"
 
-# Step 3: Modify index.html to remove base href
-echo -e "${YELLOW}Step 3: Removing base href from index.html...${NC}"
+# Modify index.html to remove base href
+echo -e "${YELLOW}Modifying index.html to remove base href...${NC}"
 
 INDEX_FILE="web/build/index.html"
 
