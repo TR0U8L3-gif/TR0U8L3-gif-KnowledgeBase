@@ -1,6 +1,7 @@
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:knowledge_base/src/knowledge_base/presentation/widgets/_helpers/heading_key_builder.dart';
+import 'package:knowledge_base/src/knowledge_base/presentation/widgets/_helpers/syntax_highlight_builder.dart';
 import 'package:knowledge_base/src/knowledge_base/presentation/widgets/_helpers/markdown_style_sheet_adapter.dart';
 import 'package:knowledge_base/src/knowledge_base/presentation/widgets/tag_chip_widget.dart';
 import 'package:markdown/markdown.dart' as md;
@@ -96,6 +97,7 @@ class MarkdownRendererWidget extends StatelessWidget {
                 'h4': headingBuilder,
                 'h5': headingBuilder,
                 'h6': headingBuilder,
+                'pre': SyntaxHighlightBuilder(),
               },
               imageBuilder: _imageBuilder,
               onTapLink: (text, href, title) => _handleLink(href),

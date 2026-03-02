@@ -51,12 +51,8 @@ MarkdownStyleSheet shadcnMarkdownStyleSheet(BuildContext context) {
     ),
 
     // Fenced code blocks
-    codeblockDecoration: BoxDecoration(
-      color: colorScheme.muted.withValues(alpha: 0.15),
-      borderRadius: BorderRadius.circular(12 * scaling),
-      border: Border.all(color: colorScheme.border, width: 0.5),
-    ),
-    codeblockPadding: EdgeInsets.all(14 * scaling),
+    codeblockDecoration: const BoxDecoration(),
+    codeblockPadding: EdgeInsets.zero,
 
     // Blockquote
     blockquote: typography.base.copyWith(
