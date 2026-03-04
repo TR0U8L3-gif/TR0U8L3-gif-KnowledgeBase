@@ -4,6 +4,7 @@ import 'package:knowledge_base/core/utils/responsive.dart';
 import 'package:knowledge_base/src/knowledge_base/presentation/bloc/document/document_bloc.dart';
 import 'package:knowledge_base/src/knowledge_base/presentation/bloc/document/document_event.dart';
 import 'package:knowledge_base/src/knowledge_base/presentation/bloc/document/document_state.dart';
+import 'package:knowledge_base/src/knowledge_base/presentation/bloc/favorites/favorites_cubit.dart';
 import 'package:knowledge_base/src/knowledge_base/presentation/bloc/navigation/navigation_bloc.dart';
 import 'package:knowledge_base/src/knowledge_base/presentation/bloc/navigation/navigation_event.dart';
 import 'package:knowledge_base/src/knowledge_base/presentation/bloc/navigation/navigation_state.dart';
@@ -23,18 +24,32 @@ class KnowledgeBasePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<NavigationBloc, NavigationState>(
-      listenWhen: (prev, curr) =>
-          prev.selectedFile != curr.selectedFile ||
-          prev.viewMode != curr.viewMode,
-      listener: (context, state) {
-        // When a file is selected and viewMode is file, load the document
-        if (state.viewMode == ViewMode.file && state.selectedFile != null) {
-          context.read<DocumentBloc>().add(
-            LoadDocument(state.selectedFile!.path),
-          );
-        }
-      },
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<NavigationBloc, NavigationState>(
+          listenWhen: (prev, curr) =>
+              prev.selectedFile != curr.selectedFile ||
+              prev.viewMode != curr.viewMode,
+          listener: (context, state) {
+            // When a file is selected and viewMode is file, load the document
+            if (state.viewMode == ViewMode.file && state.selectedFile != null) {
+              context.read<DocumentBloc>().add(
+                LoadDocument(state.selectedFile!.path),
+              );
+            }
+          },
+        ),
+        BlocListener<NavigationBloc, NavigationState>(
+          listenWhen: (prev, curr) =>
+              prev.status != curr.status &&
+              curr.status == NavigationStatus.loaded,
+          listener: (context, state) {
+            if (state.allFiles.isNotEmpty) {
+              context.read<FavoritesCubit>().loadAndValidate(state.allFiles);
+            }
+          },
+        ),
+      ],
       child: const _KnowledgeBaseView(),
     );
   }

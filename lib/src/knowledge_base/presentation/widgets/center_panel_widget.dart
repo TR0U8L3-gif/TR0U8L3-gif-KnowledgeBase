@@ -2,6 +2,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:knowledge_base/core/utils/responsive.dart';
 import 'package:knowledge_base/src/knowledge_base/presentation/bloc/document/document_bloc.dart';
 import 'package:knowledge_base/src/knowledge_base/presentation/bloc/document/document_state.dart';
+import 'package:knowledge_base/src/knowledge_base/presentation/bloc/favorites/favorites_cubit.dart';
+import 'package:knowledge_base/src/knowledge_base/presentation/bloc/favorites/favorites_state.dart';
 import 'package:knowledge_base/src/knowledge_base/presentation/bloc/navigation/navigation_bloc.dart';
 import 'package:knowledge_base/src/knowledge_base/presentation/bloc/navigation/navigation_event.dart';
 import 'package:knowledge_base/src/knowledge_base/presentation/bloc/navigation/navigation_state.dart';
@@ -36,14 +38,56 @@ class CenterPanelWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         BlocBuilder<NavigationBloc, NavigationState>(
-          buildWhen: (prev, curr) => prev.breadcrumb != curr.breadcrumb,
+          buildWhen: (prev, curr) =>
+              prev.breadcrumb != curr.breadcrumb ||
+              prev.viewMode != curr.viewMode ||
+              prev.selectedFile != curr.selectedFile,
           builder: (context, navState) {
             final labels = navState.breadcrumb.map((e) => e.label).toList();
-            return BreadcrumbWidget(
-              items: labels,
-              onItemTapped: (index) {
-                context.read<NavigationBloc>().add(NavigateToBreadcrumb(index));
-              },
+            return Row(
+              children: [
+                Expanded(
+                  child: BreadcrumbWidget(
+                    items: labels,
+                    onItemTapped: (index) {
+                      context.read<NavigationBloc>().add(
+                        NavigateToBreadcrumb(index),
+                      );
+                    },
+                  ),
+                ),
+                if (navState.viewMode == ViewMode.file &&
+                    navState.selectedFile != null)
+                  BlocBuilder<FavoritesCubit, FavoritesState>(
+                    builder: (context, favState) {
+                      final isFav = favState.isFavorite(
+                        navState.selectedFile!.path,
+                      );
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 16.0),
+                        child: Semantics(
+                          label: isFav
+                              ? 'Remove from favorites'
+                              : 'Add to favorites',
+                          child: OutlineButton(
+                            onPressed: () {
+                              context.read<FavoritesCubit>().toggleFavorite(
+                                navState.selectedFile!,
+                              );
+                            },
+                            density: ButtonDensity.icon,
+                            child: Icon(
+                              isFav
+                                  ? BootstrapIcons.bookmarkFill
+                                  : BootstrapIcons.bookmark,
+                              size: 14,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+              ],
             );
           },
         ),

@@ -1,5 +1,7 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:knowledge_base/core/utils/constants.dart';
 import 'package:knowledge_base/core/utils/responsive.dart';
+import 'package:knowledge_base/src/knowledge_base/presentation/bloc/favorites/favorites_cubit.dart';
 import 'package:knowledge_base/src/knowledge_base/presentation/widgets/tag_chip_widget.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
@@ -199,6 +201,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
       overlayBarrier: OverlayBarrier(borderRadius: theme.borderRadiusLg),
       builder: (ctx) => _SearchPopoverContent(
         allFiles: widget.allFiles,
+        savedFiles: context.read<FavoritesCubit>().state.favorites,
         isMobileOrSmaller: isMobileOrSmaller,
         initialQuery: initialQuery,
         onFileSelected: (filePath) {
@@ -261,6 +264,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
 
 class _SearchPopoverContent extends StatefulWidget {
   final List<FileItem> allFiles;
+  final List<FileItem> savedFiles;
   final void Function(String filePath) onFileSelected;
   final bool isMobileOrSmaller;
   final String? initialQuery;
@@ -268,6 +272,7 @@ class _SearchPopoverContent extends StatefulWidget {
   const _SearchPopoverContent({
     required this.allFiles,
     required this.onFileSelected,
+    this.savedFiles = const [],
     this.isMobileOrSmaller = false,
     this.initialQuery,
   });
@@ -298,11 +303,41 @@ class _SearchPopoverContentState extends State<_SearchPopoverContent> {
   List<FileItem> _filterFiles(String query) {
     final q = query.toLowerCase().trim();
     if (q.isEmpty) return widget.allFiles;
+    if (q.startsWith('/saved')) {
+      final subQuery = () {
+        try {
+          return q.substring(6).trim();
+        } catch (_) {
+          return '';
+        }
+      }();
+      if (subQuery.isEmpty) return widget.savedFiles;
+      if (subQuery.startsWith('#')) {
+        final tagQuery = subQuery.substring(1).trim();
+        if (tagQuery.isEmpty) return widget.savedFiles;
+        return widget.savedFiles
+            .where(
+              (file) =>
+                  file.tags.any((t) => t.toLowerCase().contains(tagQuery)),
+            )
+            .toList();
+      }
+      return widget.savedFiles
+          .where(
+            (file) =>
+                file.name.toLowerCase().contains(subQuery) ||
+                file.path.toLowerCase().contains(subQuery),
+          )
+          .toList();
+    }
+
     if (q.startsWith('#')) {
       final tagQuery = q.substring(1).trim();
       if (tagQuery.isEmpty) return widget.allFiles;
       return widget.allFiles
-          .where((file) => file.tags.any((t) => t.toLowerCase().contains(tagQuery)))
+          .where(
+            (file) => file.tags.any((t) => t.toLowerCase().contains(tagQuery)),
+          )
           .toList();
     }
     return widget.allFiles
@@ -348,7 +383,9 @@ class _SearchPopoverContentState extends State<_SearchPopoverContent> {
                 textField: true,
                 child: TextField(
                   controller: _controller,
-                  placeholder: const Text('Search by name or #tag...'),
+                  placeholder: const Text(
+                    'Search by name, #tag, or /saved ...',
+                  ),
                   features: [const InputFeature.clear()],
                 ),
               ),
@@ -373,9 +410,24 @@ class _SearchPopoverContentState extends State<_SearchPopoverContent> {
                         itemCount: _filteredFiles.length,
                         itemBuilder: (context, index) {
                           final file = _filteredFiles[index];
-                          final isTagSearch = _controller.text
+                          final isTagSearchInFiles = _controller.text
                               .trim()
                               .startsWith('#');
+                          final isTagSearchInSaved =
+                              _controller.text.trim().startsWith('/saved') &&
+                              () {
+                                try {
+                                  return _controller.text
+                                      .trim()
+                                      .substring(6)
+                                      .trim()
+                                      .startsWith('#');
+                                } catch (_) {
+                                  return false;
+                                }
+                              }();
+                          final isTagSearch =
+                              isTagSearchInFiles || isTagSearchInSaved;
                           return Padding(
                             padding: index == _filteredFiles.length - 1
                                 ? EdgeInsets.zero

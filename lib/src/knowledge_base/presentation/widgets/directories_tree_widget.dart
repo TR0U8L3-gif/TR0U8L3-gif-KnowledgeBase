@@ -1,6 +1,9 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:knowledge_base/core/utils/constants.dart';
 import 'package:knowledge_base/src/knowledge_base/domain/entities/knowledge_base_item.dart';
+import 'package:knowledge_base/src/knowledge_base/presentation/bloc/favorites/favorites_cubit.dart';
+import 'package:knowledge_base/src/knowledge_base/presentation/bloc/favorites/favorites_state.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 /// Presentation model for tree nodes, carrying display title and file path.
@@ -57,6 +60,8 @@ class DirectoriesTreeWidget extends StatefulWidget {
     this.selectedFilePath,
     this.onFileSelected,
     this.onDirectorySelected,
+    this.favoriteItems = const [],
+    this.onFavoriteToggle,
     super.key,
   });
 
@@ -65,6 +70,8 @@ class DirectoriesTreeWidget extends StatefulWidget {
   final String? selectedFilePath;
   final ValueChanged<String>? onFileSelected;
   final ValueChanged<String>? onDirectorySelected;
+  final List<FileItem> favoriteItems;
+  final ValueChanged<String>? onFavoriteToggle;
 
   @override
   State<DirectoriesTreeWidget> createState() => _DirectoriesTreeWidgetState();
@@ -153,6 +160,100 @@ class _DirectoriesTreeWidgetState extends State<DirectoriesTreeWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // ── Favorites section ────────────────────────────────────────
+          // BlocBuilder<FavoritesCubit, FavoritesState>(
+          //   builder: (context, favState) {
+          //     if (favState.status == FavoritesStatus.loading ||
+          //         favState.favorites.isEmpty) {
+          //       return const SizedBox.shrink();
+          //     }
+          //     return Column(
+          //       crossAxisAlignment: CrossAxisAlignment.stretch,
+          //       mainAxisSize: MainAxisSize.min,
+          //       children: [
+          //         Container(
+          //           padding: const EdgeInsets.symmetric(
+          //             horizontal: SizePadding.large,
+          //             vertical: SizePadding.base,
+          //           ),
+          //           height: 48,
+          //           child: Row(
+          //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //             children: [
+          //               const Text('Favorites').semiBold().muted(),
+          //               Semantics(
+          //                 button: true,
+          //                 label: 'Remove all favorites',
+          //                 child: OutlineButton(
+          //                   onPressed: () {
+          //                     for (final f in favState.favorites) {
+          //                       context.read<FavoritesCubit>().toggleFavorite(
+          //                         f,
+          //                       );
+          //                     }
+          //                   },
+          //                   density: ButtonDensity.icon,
+          //                   child: const Icon(
+          //                     BootstrapIcons.bookmarkX,
+          //                     size: 14,
+          //                   ).muted(),
+          //                 ),
+          //               ),
+          //             ],
+          //           ),
+          //         ),
+          //         ListView.builder(
+          //           shrinkWrap: true,
+          //           physics: const NeverScrollableScrollPhysics(),
+          //           itemCount: favState.favorites.length,
+          //           itemBuilder: (context, index) {
+          //             final file = favState.favorites[index];
+          //             return GestureDetector(
+          //               onTap: () => widget.onFileSelected?.call(file.path),
+          //               child: Padding(
+          //                 padding: const EdgeInsets.symmetric(
+          //                   horizontal: SizePadding.large,
+          //                   vertical: 4,
+          //                 ),
+          //                 child: Row(
+          //                   children: [
+          //                     const Icon(BootstrapIcons.fileFill, size: 14),
+          //                     const Gap(8),
+          //                     Expanded(
+          //                       child: Text(
+          //                         file.name,
+          //                         maxLines: 1,
+          //                         overflow: TextOverflow.ellipsis,
+          //                       ),
+          //                     ),
+          //                     Semantics(
+          //                       button: true,
+          //                       label: 'Remove ${file.name} from favorites',
+          //                       child: OutlineButton(
+          //                         onPressed: () {
+          //                           context
+          //                               .read<FavoritesCubit>()
+          //                               .toggleFavorite(file);
+          //                         },
+          //                         density: ButtonDensity.icon,
+          //                         child: const Icon(
+          //                           BootstrapIcons.x,
+          //                           size: 12,
+          //                         ).muted(),
+          //                       ),
+          //                     ),
+          //                   ],
+          //                 ),
+          //               ),
+          //             );
+          //           },
+          //         ),
+          //         const Divider(),
+          //       ],
+          //     );
+          //   },
+          // ),
+          // ── Documentation header ────────────────────────────────────
           Container(
             padding: const EdgeInsets.symmetric(
               horizontal: SizePadding.large,

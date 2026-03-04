@@ -1,8 +1,12 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:knowledge_base/src/knowledge_base/data/data_sources/favorites_local_data_source.dart';
 import 'package:knowledge_base/src/knowledge_base/data/data_sources/knowledge_base_local_data_source.dart';
+import 'package:knowledge_base/src/knowledge_base/data/repositories/favorites_repository_impl.dart';
 import 'package:knowledge_base/src/knowledge_base/data/repositories/knowledge_base_repository_impl.dart';
+import 'package:knowledge_base/src/knowledge_base/domain/repositories/favorites_repository.dart';
 import 'package:knowledge_base/src/knowledge_base/domain/repositories/knowledge_base_repository.dart';
 import 'package:knowledge_base/src/knowledge_base/presentation/bloc/document/document_bloc.dart';
+import 'package:knowledge_base/src/knowledge_base/presentation/bloc/favorites/favorites_cubit.dart';
 import 'package:knowledge_base/src/knowledge_base/presentation/bloc/navigation/navigation_bloc.dart';
 import 'package:knowledge_base/src/knowledge_base/presentation/bloc/navigation/navigation_event.dart';
 import 'package:knowledge_base/src/knowledge_base/presentation/bloc/theme/theme_cubit.dart';
@@ -10,23 +14,38 @@ import 'package:knowledge_base/src/knowledge_base/presentation/bloc/theme/theme_
 import 'package:knowledge_base/src/knowledge_base/presentation/pages/knowledge_base_page.dart';
 import 'package:provider/provider.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
-  runApp(const MainApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
+  runApp(MainApp(prefs: prefs));
 }
 
 class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+  const MainApp({required this.prefs, super.key});
+
+  final SharedPreferences prefs;
 
   @override
   Widget build(BuildContext context) {
-    return Provider<KnowledgeBaseRepository>(
-      create: (_) => KnowledgeBaseRepositoryImpl(
-        dataSource: KnowledgeBaseLocalDataSource(),
-      ),
+    return MultiProvider(
+      providers: [
+        Provider<KnowledgeBaseRepository>(
+          create: (_) => KnowledgeBaseRepositoryImpl(
+            dataSource: KnowledgeBaseLocalDataSource(),
+          ),
+        ),
+        Provider<FavoritesRepository>(
+          create: (_) => FavoritesRepositoryImpl(
+            dataSource: FavoritesLocalDataSource(prefs: prefs),
+          ),
+        ),
+      ],
       child: Builder(
         builder: (context) {
           final repository = context.read<KnowledgeBaseRepository>();
+          final favoritesRepository = context.read<FavoritesRepository>();
           return MultiBlocProvider(
             providers: [
               BlocProvider<NavigationBloc>(
@@ -38,6 +57,9 @@ class MainApp extends StatelessWidget {
                 create: (_) => DocumentBloc(repository: repository),
               ),
               BlocProvider<ThemeCubit>(create: (_) => ThemeCubit()),
+              BlocProvider<FavoritesCubit>(
+                create: (_) => FavoritesCubit(repository: favoritesRepository),
+              ),
             ],
             child: BlocBuilder<ThemeCubit, ThemeState>(
               builder: (context, themeState) {
