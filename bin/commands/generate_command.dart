@@ -6,6 +6,7 @@ import 'declare_command.dart';
 class GenerateCommandInput {
   final String sourcePath;
   final String assetsRoot;
+  final String assetsFlutter;
   final String pubspecPath;
   final String? structureOutputPath;
   final int? maxDepth;
@@ -13,6 +14,7 @@ class GenerateCommandInput {
   const GenerateCommandInput({
     required this.sourcePath,
     required this.assetsRoot,
+    required this.assetsFlutter,
     required this.pubspecPath,
     this.structureOutputPath,
     this.maxDepth,
@@ -44,7 +46,7 @@ Future<void> generateCommand(GenerateCommandInput input) async {
   // Step 3: Declare assets in pubspec
   await declareCommand(
     DeclareCommandInput(
-      assetsRoot: input.assetsRoot,
+      assetsFlutter: input.assetsFlutter,
       pubspecPath: input.pubspecPath,
     ),
   );

@@ -2,20 +2,20 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 
 class DeclareCommandInput {
-  final String assetsRoot;
+  final String assetsFlutter;
   final String pubspecPath;
 
   const DeclareCommandInput({
-    required this.assetsRoot,
+    required this.assetsFlutter,
     required this.pubspecPath,
   });
 }
 
 /// Scans assets directory and adds all files to pubspec.yaml flutter: assets:
 Future<void> declareCommand(DeclareCommandInput input) async {
-  final assetsDir = Directory(input.assetsRoot);
+  final assetsDir = Directory(input.assetsFlutter);
   if (!await assetsDir.exists()) {
-    throw Exception('Assets directory does not exist: ${input.assetsRoot}');
+    throw Exception('Assets directory does not exist: ${input.assetsFlutter}');
   }
 
   final pubspecFile = File(input.pubspecPath);
@@ -23,7 +23,7 @@ Future<void> declareCommand(DeclareCommandInput input) async {
     throw Exception('pubspec.yaml not found: ${input.pubspecPath}');
   }
 
-  final assetPaths = await _collectAssetPaths(assetsDir, input.assetsRoot);
+  final assetPaths = await _collectAssetPaths(assetsDir, input.assetsFlutter);
   await _updatePubspecAssets(pubspecFile, assetPaths);
 }
 

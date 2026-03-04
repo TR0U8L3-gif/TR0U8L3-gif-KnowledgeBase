@@ -6,7 +6,8 @@ import 'commands/move_command.dart';
 import 'commands/declare_command.dart';
 import 'commands/generate_command.dart';
 
-const String defaultAssetsDir = 'doc_assets';
+const String defaultAssetsDir = 'assets/data';
+const String defaultSourceDir = 'docs';
 
 void main(List<String> arguments) async {
   final parser = ArgParser()
@@ -56,7 +57,7 @@ ArgParser _buildStructureParser() {
       'source',
       abbr: 's',
       help: 'Source directory to scan',
-      mandatory: true,
+      defaultsTo: defaultSourceDir,
     )
     ..addOption('output', abbr: 'o', help: 'Output JSON file path')
     ..addOption(
@@ -80,7 +81,7 @@ ArgParser _buildMoveParser() {
       abbr: 's',
       help:
           'Root directory that contains the files referenced by the structure',
-      mandatory: true,
+      defaultsTo: defaultSourceDir,
     )
     ..addOption(
       'assets',
@@ -93,10 +94,10 @@ ArgParser _buildMoveParser() {
 ArgParser _buildDeclareParser() {
   return ArgParser()
     ..addOption(
-      'assets',
-      abbr: 'a',
+      'assetsFlutter',
+      abbr: 'f',
       help: 'Assets directory to scan',
-      defaultsTo: defaultAssetsDir,
+      defaultsTo: 'assets',
     )
     ..addOption(
       'pubspec',
@@ -112,7 +113,7 @@ ArgParser _buildGenerateParser() {
       'source',
       abbr: 's',
       help: 'Source directory to scan',
-      mandatory: true,
+      defaultsTo: defaultSourceDir,
     )
     ..addOption(
       'assets',
@@ -136,6 +137,12 @@ ArgParser _buildGenerateParser() {
       abbr: 'd',
       help: 'Maximum directory depth to scan',
       defaultsTo: '16',
+    )
+    ..addOption(
+      'assetsFlutter',
+      abbr: 'f',
+      help: 'Assets directory to scan',
+      defaultsTo: 'assets',
     );
 }
 
@@ -196,18 +203,18 @@ Future<void> _runMove(ArgResults args) async {
 Future<void> _runDeclare(ArgResults args) async {
   final logger = Logger.standard();
 
-  final assetsRoot = args['assets'] as String?;
+  final assetsFlutter = args['assetsFlutter'] as String?;
   final pubspecPath = args['pubspec'] as String?;
 
-  if (assetsRoot == null || pubspecPath == null) {
-    throw ArgumentError('Missing required --assets or --pubspec');
+  if (assetsFlutter == null || pubspecPath == null) {
+    throw ArgumentError('Missing required --assetsFlutter or --pubspec');
   }
 
-  logger.stdout('Declaring assets from $assetsRoot in $pubspecPath');
+  logger.stdout('Declaring assets from $assetsFlutter in $pubspecPath');
   final progress = logger.progress('Updating pubspec.yaml');
 
   await declareCommand(
-    DeclareCommandInput(assetsRoot: assetsRoot, pubspecPath: pubspecPath),
+    DeclareCommandInput(assetsFlutter: assetsFlutter, pubspecPath: pubspecPath),
   );
 
   progress.finish(showTiming: true);
@@ -219,14 +226,20 @@ Future<void> _runGenerate(ArgResults args) async {
 
   final sourcePath = args['source'] as String?;
   final assetsRoot = args['assets'] as String?;
+  final assetsFlutter = args['assetsFlutter'] as String?;
   final pubspecPath = args['pubspec'] as String?;
   final structureOutputPath = args['structure'] as String?;
   final maxDepth = (args['max-depth'] as String?) != null
       ? int.tryParse(args['max-depth'] as String)
       : null;
 
-  if (sourcePath == null || assetsRoot == null || pubspecPath == null) {
-    throw ArgumentError('Missing required --source, --assets, or --pubspec');
+  if (sourcePath == null ||
+      assetsRoot == null ||
+      assetsFlutter == null ||
+      pubspecPath == null) {
+    throw ArgumentError(
+      'Missing required --source, --assets, --assetsFlutter, or --pubspec',
+    );
   }
 
   logger.stdout('Generating assets from $sourcePath to $assetsRoot');
@@ -236,6 +249,7 @@ Future<void> _runGenerate(ArgResults args) async {
     GenerateCommandInput(
       sourcePath: sourcePath,
       assetsRoot: assetsRoot,
+      assetsFlutter: assetsFlutter,
       pubspecPath: pubspecPath,
       structureOutputPath: structureOutputPath,
       maxDepth: maxDepth,
