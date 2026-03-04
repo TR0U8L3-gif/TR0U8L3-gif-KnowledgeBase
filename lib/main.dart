@@ -16,16 +16,13 @@ import 'package:provider/provider.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  final prefs = await SharedPreferences.getInstance();
-  runApp(MainApp(prefs: prefs));
+  runApp(const MainApp());
 }
 
 class MainApp extends StatelessWidget {
-  const MainApp({required this.prefs, super.key});
-
-  final SharedPreferences prefs;
+  const MainApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +35,9 @@ class MainApp extends StatelessWidget {
         ),
         Provider<FavoritesRepository>(
           create: (_) => FavoritesRepositoryImpl(
-            dataSource: FavoritesLocalDataSource(prefs: prefs),
+            dataSource: FavoritesLocalDataSource(
+              prefs: SharedPreferencesAsync(),
+            ),
           ),
         ),
       ],

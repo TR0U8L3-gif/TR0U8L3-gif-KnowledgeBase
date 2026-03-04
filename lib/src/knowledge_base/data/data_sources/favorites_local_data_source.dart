@@ -4,9 +4,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// Local data source for persisting favorite article paths using SharedPreferences.
 class FavoritesLocalDataSource {
-  FavoritesLocalDataSource({required SharedPreferences prefs}) : _prefs = prefs;
+  FavoritesLocalDataSource({required SharedPreferencesAsync prefs})
+    : _prefs = prefs;
 
-  final SharedPreferences _prefs;
+  final SharedPreferencesAsync _prefs;
 
   static const _kKey = 'favorites';
 
@@ -15,7 +16,7 @@ class FavoritesLocalDataSource {
   /// If reading from storage fails, throws [LocalDataSourceException].
   Future<List<String>> loadFavoritePaths() async {
     try {
-      final raw = _prefs.getString(_kKey);
+      final raw = await _prefs.getString(_kKey);
       if (raw == null) return [];
       final decoded = jsonDecode(raw);
       if (decoded is List) {

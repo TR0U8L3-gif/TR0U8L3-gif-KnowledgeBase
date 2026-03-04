@@ -1,4 +1,5 @@
 - support mermaid and drawio
+- update github actions to handle flutter web build
 
 Mermaid:
 - create html site that will have component that changes size randomly and will return its size in callback, make flutter adapt size to this component
