@@ -14,7 +14,6 @@ import 'package:knowledge_base/src/knowledge_base/presentation/bloc/theme/theme_
 import 'package:knowledge_base/src/knowledge_base/presentation/pages/knowledge_base_page.dart';
 import 'package:provider/provider.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,11 +33,8 @@ class MainApp extends StatelessWidget {
           ),
         ),
         Provider<FavoritesRepository>(
-          create: (_) => FavoritesRepositoryImpl(
-            dataSource: FavoritesLocalDataSource(
-              prefs: SharedPreferencesAsync(),
-            ),
-          ),
+          create: (_) =>
+              FavoritesRepositoryImpl(dataSource: FavoritesLocalDataSource()),
         ),
       ],
       child: Builder(
