@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:knowledge_base/core/shared/app_bloc_observer.dart';
 import 'package:knowledge_base/core/shared/app_logger.dart';
+import 'package:knowledge_base/core/shared/logging/web_console_stub.dart'
+    if (dart.library.js_interop) 'package:knowledge_base/core/shared/logging/web_console.dart';
 import 'package:knowledge_base/src/knowledge_base/data/data_sources/favorites_local_data_source.dart';
 import 'package:knowledge_base/src/knowledge_base/data/data_sources/knowledge_base_local_data_source.dart';
 import 'package:knowledge_base/src/knowledge_base/data/repositories/favorites_repository_impl.dart';
@@ -22,6 +24,8 @@ import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+
+  registerDebugCommands();
 
   Bloc.observer = const AppBlocObserver();
 
