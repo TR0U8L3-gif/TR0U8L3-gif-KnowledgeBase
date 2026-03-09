@@ -1,5 +1,5 @@
 {
-  "generated": "2026-03-01T18:45:18.394409",
+  "generated": "2026-03-05T00:38:28.817053",
   "directory": {
     "type": "directory",
     "name": "docs",
@@ -239,8 +239,8 @@
         "description": null,
         "tags": null,
         "image": null,
-        "last_modified": "2026-03-01T02:56:15.431",
-        "created": "2026-03-01T02:56:15.431",
+        "last_modified": "2026-03-01T18:50:57.048",
+        "created": "2026-03-01T18:50:57.048",
         "extension": "md"
       }
     ],
