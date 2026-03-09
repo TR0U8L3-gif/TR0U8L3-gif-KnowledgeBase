@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:knowledge_base/core/shared/app_logger.dart';
 
 import '../../../domain/entities/knowledge_base_item.dart';
 import '../../../domain/repositories/favorites_repository.dart';
@@ -19,22 +20,38 @@ class FavoritesCubit extends Cubit<FavoritesState> {
 
     emit(state.copyWith(status: FavoritesStatus.loading));
 
-    final resolved = await _repository.loadAndValidateFavorites(allFiles);
-
-    emit(state.copyWith(status: FavoritesStatus.loaded, favorites: resolved));
+    try {
+      final resolved = await _repository.loadAndValidateFavorites(allFiles);
+      emit(state.copyWith(status: FavoritesStatus.loaded, favorites: resolved));
+    } catch (e, st) {
+      AppLogger.error(
+        'Failed to load and validate favorites',
+        name: 'FavoritesCubit',
+        error: e,
+        stackTrace: st,
+      );
+      emit(state.copyWith(status: FavoritesStatus.error));
+    }
   }
 
   /// Toggles the favorite status of [file]. If already favorited, removes it;
   /// otherwise adds it to the front of the list.
   Future<void> toggleFavorite(FileItem file) async {
-    final List<FileItem> updated;
-
-    if (state.isFavorite(file.path)) {
-      updated = await _repository.removeFavorite(file.path, state.favorites);
-    } else {
-      updated = await _repository.addFavorite(file, state.favorites);
+    try {
+      final List<FileItem> updated;
+      if (state.isFavorite(file.path)) {
+        updated = await _repository.removeFavorite(file.path, state.favorites);
+      } else {
+        updated = await _repository.addFavorite(file, state.favorites);
+      }
+      emit(state.copyWith(favorites: updated));
+    } catch (e, st) {
+      AppLogger.error(
+        'Failed to toggle favorite: ${file.path}',
+        name: 'FavoritesCubit',
+        error: e,
+        stackTrace: st,
+      );
     }
-
-    emit(state.copyWith(favorites: updated));
   }
 }

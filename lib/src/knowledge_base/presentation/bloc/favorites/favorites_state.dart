@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 import '../../../domain/entities/knowledge_base_item.dart';
 
-enum FavoritesStatus { initial, loading, loaded }
+enum FavoritesStatus { initial, loading, loaded, error }
 
 final class FavoritesState extends Equatable {
   final FavoritesStatus status;

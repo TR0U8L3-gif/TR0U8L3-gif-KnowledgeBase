@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:knowledge_base/core/shared/app_logger.dart';
 
 import '../../../domain/entities/knowledge_base_item.dart';
 import '../../../domain/repositories/knowledge_base_repository.dart';
@@ -50,7 +51,13 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
           currentPage: 1,
         ),
       );
-    } catch (e) {
+    } catch (e, st) {
+      AppLogger.error(
+        'Failed to load index',
+        name: 'NavigationBloc',
+        error: e,
+        stackTrace: st,
+      );
       emit(
         state.copyWith(
           status: NavigationStatus.error,

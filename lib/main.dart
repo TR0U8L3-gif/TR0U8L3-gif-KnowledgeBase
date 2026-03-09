@@ -1,4 +1,9 @@
+import 'dart:ui';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:knowledge_base/core/shared/app_bloc_observer.dart';
+import 'package:knowledge_base/core/shared/app_logger.dart';
 import 'package:knowledge_base/src/knowledge_base/data/data_sources/favorites_local_data_source.dart';
 import 'package:knowledge_base/src/knowledge_base/data/data_sources/knowledge_base_local_data_source.dart';
 import 'package:knowledge_base/src/knowledge_base/data/repositories/favorites_repository_impl.dart';
@@ -17,6 +22,28 @@ import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+
+  Bloc.observer = const AppBlocObserver();
+
+  FlutterError.onError = (details) {
+    AppLogger.error(
+      details.exceptionAsString(),
+      name: 'FlutterError',
+      stackTrace: details.stack,
+    );
+    FlutterError.presentError(details);
+  };
+
+  PlatformDispatcher.instance.onError = (error, stack) {
+    AppLogger.error(
+      error.toString(),
+      name: 'PlatformDispatcher',
+      error: error,
+      stackTrace: stack,
+    );
+    return false;
+  };
+
   runApp(const MainApp());
 }
 

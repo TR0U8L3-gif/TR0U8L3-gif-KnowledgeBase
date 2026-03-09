@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:knowledge_base/core/shared/app_logger.dart';
 
 /// Local data source for persisting favorite article paths using FlutterSecureStorage.
 class FavoritesLocalDataSource {
@@ -23,7 +24,13 @@ class FavoritesLocalDataSource {
         return decoded.cast<String>();
       }
       return [];
-    } catch (e) {
+    } catch (e, st) {
+      AppLogger.error(
+        'Failed to load favorite paths',
+        name: 'FavoritesLocalDataSource',
+        error: e,
+        stackTrace: st,
+      );
       throw LocalDataSourceException('Failed to load favorite paths: $e');
     }
   }
@@ -33,7 +40,13 @@ class FavoritesLocalDataSource {
   Future<void> saveFavoritePaths(List<String> paths) async {
     try {
       await _storage.write(key: _kKey, value: jsonEncode(paths));
-    } catch (e) {
+    } catch (e, st) {
+      AppLogger.error(
+        'Failed to save favorite paths',
+        name: 'FavoritesLocalDataSource',
+        error: e,
+        stackTrace: st,
+      );
       throw LocalDataSourceException('Failed to save favorite paths: $e');
     }
   }

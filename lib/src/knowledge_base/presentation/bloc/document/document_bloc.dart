@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:knowledge_base/core/shared/app_logger.dart';
 
 import '../../../domain/repositories/knowledge_base_repository.dart';
 import 'document_event.dart';
@@ -37,7 +38,13 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
           currentPath: event.path,
         ),
       );
-    } catch (e) {
+    } catch (e, st) {
+      AppLogger.error(
+        'Failed to load document: ${event.path}',
+        name: 'DocumentBloc',
+        error: e,
+        stackTrace: st,
+      );
       emit(
         DocumentState(
           status: DocumentStatus.error,
