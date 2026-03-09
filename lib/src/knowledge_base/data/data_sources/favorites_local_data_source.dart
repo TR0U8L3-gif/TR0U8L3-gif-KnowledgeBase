@@ -1,12 +1,13 @@
 import 'dart:convert';
 
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-/// Local data source for persisting favorite article paths using SharedPreferences.
+/// Local data source for persisting favorite article paths using FlutterSecureStorage.
 class FavoritesLocalDataSource {
-  FavoritesLocalDataSource({SharedPreferences? prefs}) : _prefs = prefs;
+  FavoritesLocalDataSource({FlutterSecureStorage? storage})
+    : _storage = storage ?? const FlutterSecureStorage();
 
-  final SharedPreferences? _prefs;
+  final FlutterSecureStorage _storage;
 
   static const _kKey = 'favorites';
 
@@ -15,8 +16,7 @@ class FavoritesLocalDataSource {
   /// If reading from storage fails, throws [LocalDataSourceException].
   Future<List<String>> loadFavoritePaths() async {
     try {
-      final prefs = _prefs ?? await SharedPreferences.getInstance();
-      final raw = prefs.getString(_kKey);
+      final raw = await _storage.read(key: _kKey);
       if (raw == null) return [];
       final decoded = jsonDecode(raw);
       if (decoded is List) {
@@ -32,8 +32,7 @@ class FavoritesLocalDataSource {
   /// If saving to storage fails, throws [LocalDataSourceException].
   Future<void> saveFavoritePaths(List<String> paths) async {
     try {
-      final prefs = _prefs ?? await SharedPreferences.getInstance();
-      await prefs.setString(_kKey, jsonEncode(paths));
+      await _storage.write(key: _kKey, value: jsonEncode(paths));
     } catch (e) {
       throw LocalDataSourceException('Failed to save favorite paths: $e');
     }
