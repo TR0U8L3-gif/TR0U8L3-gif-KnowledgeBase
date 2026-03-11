@@ -28,10 +28,11 @@ dart run bin/run.dart generate -s docs -a "assets/data"
 
 # Remove old files
 rm -rf ./build/web
+rm -rf web/build
 
 # Build Flutter web
 echo -e "${YELLOW}Building Flutter web app...${NC}"
-flutter build web --release
+flutter build web --debug
 
 if [ $? -ne 0 ]; then
     echo -e "${RED}Flutter build failed!${NC}"
@@ -46,11 +47,8 @@ echo -e "${YELLOW}Copying build output to web/build...${NC}"
 # Create web/build directory if it doesn't exist
 mkdir -p web/build
 
-# Remove old files in web/build
-rm -rf web/build/*
-
 # Copy all files from build/web to web/build
-cp -r build/web/* web/build/
+cp -r ./build/web/* ./web/build/
 
 echo -e "${GREEN}✓ Files copied successfully${NC}"
 

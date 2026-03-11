@@ -5,7 +5,7 @@ import 'package:shadcn_flutter/shadcn_flutter.dart';
 void main() {
   Widget buildApp({required WidgetBuilder builder}) {
     return ShadcnApp(
-      theme: ThemeData(colorScheme: ColorSchemes.darkDefaultColor, radius: 0.5),
+      theme: ThemeData(colorScheme: ColorSchemes.darkZinc, radius: 0.5),
       home: Builder(builder: builder),
     );
   }

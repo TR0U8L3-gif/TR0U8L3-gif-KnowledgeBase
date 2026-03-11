@@ -100,8 +100,8 @@ class MainApp extends StatelessWidget {
                   debugShowCheckedModeBanner: false,
                   theme: ThemeData(
                     colorScheme: isDark
-                        ? ColorSchemes.darkDefaultColor
-                        : ColorSchemes.lightDefaultColor,
+                        ? ColorSchemes.darkZinc
+                        : ColorSchemes.lightZinc,
                     radius: 0.5,
                   ),
                   popoverHandler: const PopoverOverlayHandler(),
