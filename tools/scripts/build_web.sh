@@ -26,6 +26,9 @@ fi
 echo -e "${YELLOW}Indexing assets...${NC}"
 dart run bin/run.dart generate -s docs -a "assets/data"
 
+# Remove old files
+rm -rf ./build/web
+
 # Build Flutter web
 echo -e "${YELLOW}Building Flutter web app...${NC}"
 flutter build web --release
@@ -71,5 +74,4 @@ fi
 
 echo -e "${GREEN}==================================${NC}"
 echo -e "${GREEN}Build and deployment preparation complete!${NC}"
-echo -e "${GREEN}Files are ready in web/build directory${NC}"
 echo -e "${GREEN}==================================${NC}"
